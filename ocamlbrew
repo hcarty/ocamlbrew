@@ -27,6 +27,10 @@ OCAML_BASE="$OCAMLBREW_BASE"/ocaml-$OCAML_VERSION
 # Parent directory where software will be installed
 : ${BUILD_DIR="$OCAML_BASE"/build}
 
+# odb paths
+: ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
+: ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
+
 # Output will be redirected to this file
 : ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
 
@@ -38,7 +42,7 @@ echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBR
 echo Output will be written to "$OCAMLBREW_LOGFILE"
 echo
 
-read -p "Continue (y/n)?"
+read -p "Continue (y/n)? "
 if [ "${REPLY,,}" != "y" ]; then
     echo Exiting...
     rm -f "$OCAMLBREW_LOGFILE"
@@ -112,14 +116,29 @@ chmod +x odb.ml
 cd "$OCAML_BASE"/etc
 curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
 set +u
+export ODB_BUILD_DIR="$ODB_BUILD_DIR"
+export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
 source odb.bashrc
 set -u
+mkdir -p "$ODB_BUILD_DIR"
+mkdir -p "$ODB_INSTALL_DIR"
 } >> "$OCAMLBREW_LOGFILE" 2>&1
 
 # oasis
 
 echo Installing oasis using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-odb.ml oasis >> "$OCAMLBREW_LOGFILE" 2>&1
+{
+odb.ml oUnit fileutils
+odb.ml oasis
+} >> "$OCAMLBREW_LOGFILE" 2>&1
+
+# Create a sourceable environment
+{
+echo "export ODB_BUILD_DIR=$ODB_BUILD_DIR
+export ODB_INSTALL_DIR=$ODB_INSTALL_DIR
+export PATH=$OCAML_BASE/bin:\$PATH
+source $OCAML_BASE/etc/odb.bashrc"
+} > $OCAML_BASE/etc/ocamlbrew.bashrc
 
 # All done!
 
@@ -129,9 +148,7 @@ echo
 echo "You may now want to add the following lines to your ~/.bashrc so that the
 OCaml, findlib, odb.ml and oasis are readily available to use:
 
-export OCAML_BASE="$OCAML_BASE"
-export PATH=\$OCAML_BASE/bin:\$PATH
-source \$OCAML_BASE/etc/odb.bashrc
+source $OCAML_BASE/etc/ocamlbrew.bashrc
 
 Enjoy!"
 
