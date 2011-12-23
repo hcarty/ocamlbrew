@@ -39,7 +39,7 @@ echo Output will be written to "$OCAMLBREW_LOGFILE"
 echo
 
 read -p "Continue (y/n)?"
-if [ ${REPLY,,} != "y" ]; then
+if [ "${REPLY,,}" != "y" ]; then
     echo Exiting...
     rm -f "$OCAMLBREW_LOGFILE"
     exit 1
