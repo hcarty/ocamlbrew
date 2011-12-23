@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# Fail if we try to use an undefined value
+set -u
+# Quit on errors
+set -e
+
+# Set configuration options such as installation and build locations here
+
+# The version of OCaml we are installing and download URL
+: ${OCAML_MAJOR_VERSION=3}
+: ${OCAML_MINOR_VERSION=12}
+: ${OCAML_PATCH_VERSION=1}
+: ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
+: ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
+
+# findlib version we are installing and download URL
+: ${FINDLIB_MAJOR_VERSION=1}
+: ${FINDLIB_MINOR_VERSION=2}
+: ${FINDLIB_PATCH_VERSION=7}
+: ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
+: ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
+
+# Installation prefix for the software being installed
+: ${OCAMLBREW_BASE=$HOME/ocamlbrew}
+OCAML_BASE="$OCAMLBREW_BASE"/ocaml-$OCAML_VERSION
+# Parent directory where software will be installed
+: ${BUILD_DIR="$OCAML_BASE"/build}
+
+# Output will be redirected to this file
+: ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
+
+# Main entry point
+echo Welcome to ocamlbrew!
+echo
+echo Working with $OCAML_URL | tee -a "$OCAMLBREW_LOGFILE"
+echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBREW_LOGFILE"
+echo Output will be written to "$OCAMLBREW_LOGFILE"
+echo
+
+# Create and move to the build directory
+mkdir -p "$BUILD_DIR" > "$OCAMLBREW_LOGFILE" 2>&1
+pushd "$BUILD_DIR" >> "$OCAMLBREW_LOGFILE" 2>&1
+
+# OCaml
+
+echo Retrieving OCaml | tee -a "$OCAMLBREW_LOGFILE"
+curl -O "$OCAML_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
+
+echo Extracting and building OCaml | tee -a "$OCAMLBREW_LOGFILE"
+tar xzf ocaml-$OCAML_VERSION.tar.gz >> "$OCAMLBREW_LOGFILE" 2>&1
+cd ocaml-$OCAML_VERSION
+./configure -prefix "$OCAML_BASE" >> "$OCAMLBREW_LOGFILE" 2>&1
+make world.opt >> "$OCAMLBREW_LOGFILE" 2>&1
+
+echo Installing OCaml | tee -a "$OCAMLBREW_LOGFILE"
+make install >> "$OCAMLBREW_LOGFILE" 2>&1
+# Install the compiler libraries as well.  They are needed for utop and some
+# other projects.
+mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/typing >> "$OCAMLBREW_LOGFILE" 2>&1
+mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing >> "$OCAMLBREW_LOGFILE" 2>&1
+mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/utils >> "$OCAMLBREW_LOGFILE" 2>&1
+cp typing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/typing/ >> "$OCAMLBREW_LOGFILE" 2>&1
+cp parsing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing/ >> "$OCAMLBREW_LOGFILE" 2>&1
+cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/ >> "$OCAMLBREW_LOGFILE" 2>&1
+
+# Setup the path so that OCaml is visible
+PATH="$OCAML_BASE"/bin:$PATH
+
+# findlib
+
+echo Retrieving findlib | tee -a "$OCAMLBREW_LOGFILE"
+curl -O "$FINDLIB_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
+
+echo Extracting and building findlib | tee -a "$OCAMLBREW_LOGFILE"
+tar xzf findlib-$FINDLIB_VERSION.tar.gz >> "$OCAMLBREW_LOGFILE" 2>&1
+cd findlib-$FINDLIB_VERSION >> "$OCAMLBREW_LOGFILE" 2>&1
+./configure >> "$OCAMLBREW_LOGFILE" 2>&1
+make all opt >> "$OCAMLBREW_LOGFILE" 2>&1
+
+echo Installing and configuring findlib | tee -a "$OCAMLBREW_LOGFILE"
+make install >> "$OCAMLBREW_LOGFILE" 2>&1
+# Extra configuration for OCaml libraries with C stubs, as recommended by the
+# findlib documentation.
+mkdir `ocamlfind printconf destdir`/stublibs >> "$OCAMLBREW_LOGFILE" 2>&1
+echo `ocamlfind printconf destdir`/stublibs >> `ocamlfind printconf ldconf` >> "$OCAMLBREW_LOGFILE" 2>&1
+
+# odb
+
+echo Retrieving the latest version of odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+cd "$OCAML_BASE"/bin >> "$OCAMLBREW_LOGFILE" 2>&1
+curl -O https://raw.github.com/thelema/odb/master/odb.ml >> "$OCAMLBREW_LOGFILE" 2>&1
+chmod +x odb.ml >> "$OCAMLBREW_LOGFILE" 2>&1
+cd "$OCAML_BASE"/etc >> "$OCAMLBREW_LOGFILE" 2>&1
+curl -O https://raw.github.com/thelema/odb/master/odb.bashrc >> "$OCAMLBREW_LOGFILE" 2>&1
+set +u
+source odb.bashrc >> "$OCAMLBREW_LOGFILE" 2>&1
+set -u
+
+# oasis
+
+echo Installing oasis using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+odb.ml fileutils oUnit >> "$OCAMLBREW_LOGFILE" 2>&1
+odb.ml oasis >> "$OCAMLBREW_LOGFILE" 2>&1
+
+# All done!
+
+echo Done! | tee -a "$OCAMLBREW_LOGFILE"
+popd >> "$OCAMLBREW_LOGFILE" 2>&1
+echo
+echo "You may now want to add the following lines to your ~/.bashrc so that the
+OCaml, findlib, odb.ml and oasis are readily available to use:
+
+export OCAML_BASE="$OCAML_BASE"
+export PATH=\$OCAML_BASE/bin:\$PATH
+source \$OCAML_BASE/etc/odb.bashrc
+
+Enjoy!"
+
