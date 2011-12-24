@@ -24,7 +24,7 @@ set -e
 # Installation prefix for the software being installed
 : ${OCAMLBREW_BASE=$HOME/ocamlbrew}
 OCAML_BASE="$OCAMLBREW_BASE"/ocaml-$OCAML_VERSION
-# Parent directory where software will be installed
+# Parent directory where software will be built
 : ${BUILD_DIR="$OCAML_BASE"/build}
 
 # odb paths
