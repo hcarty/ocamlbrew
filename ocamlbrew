@@ -42,6 +42,49 @@ echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBR
 echo Output will be written to "$OCAMLBREW_LOGFILE"
 echo
 
+# Ask the user what components they would like to install
+read -p "Would you like to install findlib? (y/n) "
+if [ "${REPLY,,}" != "y" ]; then
+    FINDLIB_INSTALL="false"
+    ODB_INSTALL="false"
+    OASIS_INSTALL="false"
+    UTOP_INSTALL="false"
+    BATTERIES_INSTALL="false"
+else
+    FINDLIB_INSTALL="true"
+    ODB_INSTALL="true"
+    read -p "Would you like to install oasis? (y/n) "
+    if [ "${REPLY,,}" = "y" ]; then
+        OASIS_INSTALL="true"
+    else
+        OASIS_INSTALL="false"
+    fi
+
+    read -p "Would you like to install utop? (y/n) "
+    if [ "${REPLY,,}" = "y" ]; then
+        UTOP_INSTALL="true"
+    else
+        UTOP_INSTALL="false"
+    fi
+
+    read -p "Would you like to install Batteries? (y/n) "
+    if [ "${REPLY,,}" = "y" ]; then
+        BATTERIES_INSTALL="true"
+    else
+        BATTERIES_INSTALL="false"
+    fi
+fi
+
+# Print a summary of what we are going to do, then continue
+echo This script is about to:
+echo Install OCaml
+if "$FINDLIB_INSTALL" = "true"; then echo and install findlib; fi
+if "$ODB_INSTALL" = "true"; then echo and install odb; fi
+if "$OASIS_INSTALL" = "true"; then echo and install oasis; fi
+if "$UTOP_INSTALL" = "true"; then echo and install utop; fi
+if "$BATTERIES_INSTALL" = "true"; then echo and install Batteries; fi
+echo
+
 read -p "Continue (y/n)? "
 if [ "${REPLY,,}" != "y" ]; then
     echo Exiting...
@@ -85,68 +128,94 @@ cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/
 PATH="$OCAML_BASE"/bin:$PATH
 
 # findlib
+if [ "$FINDLIB_INSTALL" = "true" ]; then
+    echo Retrieving findlib | tee -a "$OCAMLBREW_LOGFILE"
+    curl -O "$FINDLIB_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
 
-echo Retrieving findlib | tee -a "$OCAMLBREW_LOGFILE"
-curl -O "$FINDLIB_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
+    echo Extracting and building findlib | tee -a "$OCAMLBREW_LOGFILE"
+    {
+    tar xzf findlib-$FINDLIB_VERSION.tar.gz
+    cd findlib-$FINDLIB_VERSION
+    ./configure
+    make all opt
+    } >> "$OCAMLBREW_LOGFILE" 2>&1
 
-echo Extracting and building findlib | tee -a "$OCAMLBREW_LOGFILE"
-{
-tar xzf findlib-$FINDLIB_VERSION.tar.gz
-cd findlib-$FINDLIB_VERSION
-./configure
-make all opt
-} >> "$OCAMLBREW_LOGFILE" 2>&1
-
-echo Installing and configuring findlib | tee -a "$OCAMLBREW_LOGFILE"
-{
-make install
-# Extra configuration for OCaml libraries with C stubs, as recommended by the
-# findlib documentation.
-mkdir `ocamlfind printconf destdir`/stublibs
-echo `ocamlfind printconf destdir`/stublibs >> `ocamlfind printconf ldconf`
-} >> "$OCAMLBREW_LOGFILE" 2>&1
+    echo Installing and configuring findlib | tee -a "$OCAMLBREW_LOGFILE"
+    {
+    make install
+    # Extra configuration for OCaml libraries with C stubs, as recommended by the
+    # findlib documentation.
+    mkdir `ocamlfind printconf destdir`/stublibs
+    echo `ocamlfind printconf destdir`/stublibs >> `ocamlfind printconf ldconf`
+    } >> "$OCAMLBREW_LOGFILE" 2>&1
+fi
 
 # odb
+if [ "$ODB_INSTALL" = "true" ]; then
+    echo Retrieving the latest version of odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+    {
+    cd "$OCAML_BASE"/bin
+    curl -O https://raw.github.com/thelema/odb/master/odb.ml
+    chmod +x odb.ml
+    cd "$OCAML_BASE"/etc
+    curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
+    set +u
+    export ODB_BUILD_DIR="$ODB_BUILD_DIR"
+    export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
+    source odb.bashrc
+    set -u
+    mkdir -p "$ODB_BUILD_DIR"
+    mkdir -p "$ODB_INSTALL_DIR"
+    } >> "$OCAMLBREW_LOGFILE" 2>&1
 
-echo Retrieving the latest version of odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-{
-cd "$OCAML_BASE"/bin
-curl -O https://raw.github.com/thelema/odb/master/odb.ml
-chmod +x odb.ml
-cd "$OCAML_BASE"/etc
-curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
-set +u
-export ODB_BUILD_DIR="$ODB_BUILD_DIR"
-export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
-source odb.bashrc
-set -u
-mkdir -p "$ODB_BUILD_DIR"
-mkdir -p "$ODB_INSTALL_DIR"
-} >> "$OCAMLBREW_LOGFILE" 2>&1
+    # Create a sourceable environment
+    {
+    echo export ODB_BUILD_DIR=$ODB_BUILD_DIR
+    echo export ODB_INSTALL_DIR=$ODB_INSTALL_DIR
+    echo export PATH=$OCAML_BASE/bin:\$PATH
+    echo source $OCAML_BASE/etc/odb.bashrc
+    } > $OCAML_BASE/etc/ocamlbrew.bashrc
+else
+    # Create a sourceable environment
+    {
+        echo export PATH=$OCAML_BASE/bin:\$PATH
+    } > $OCAML_BASE/etc/ocamlbrew.bashrc
+fi
 
 # oasis
+if [ "$OASIS_INSTALL" = "true" ]; then
+    echo Installing oasis using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+    {
+    odb.ml oUnit fileutils
+    odb.ml oasis
+    } >> "$OCAMLBREW_LOGFILE" 2>&1
+fi
 
-echo Installing oasis using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-{
-odb.ml oUnit fileutils
-odb.ml oasis
-} >> "$OCAMLBREW_LOGFILE" 2>&1
+# utop
+if [ "$UTOP_INSTALL" = "true" ]; then
+    echo Installing utop using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+    {
+    # React is an optional dependency of Lwt
+    odb.ml react
+    # Make sure Lwt is built with React support
+    odb.ml --configure-flags --enable-react lwt
+    odb.ml utop
+    } >> "$OCAMLBREW_LOGFILE" 2>&1
+fi
 
-# Create a sourceable environment
-{
-echo "export ODB_BUILD_DIR=$ODB_BUILD_DIR
-export ODB_INSTALL_DIR=$ODB_INSTALL_DIR
-export PATH=$OCAML_BASE/bin:\$PATH
-source $OCAML_BASE/etc/odb.bashrc"
-} > $OCAML_BASE/etc/ocamlbrew.bashrc
+# Batteries
+if [ "$BATTERIES_INSTALL" = "true" ]; then
+    echo Installing Batteries using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+    odb.ml batteries >> "$OCAMLBREW_LOGFILE" 2>&1
+fi
 
 # All done!
 
 echo Done! | tee -a "$OCAMLBREW_LOGFILE"
 popd >> "$OCAMLBREW_LOGFILE" 2>&1
 echo
-echo "You may now want to add the following lines to your ~/.bashrc so that the
-OCaml, findlib, odb.ml and oasis are readily available to use:
+echo "You may want to add the following line to your ~/.bashrc so that OCaml is
+readily available to use:
 
 source $OCAML_BASE/etc/ocamlbrew.bashrc
 
