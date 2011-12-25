@@ -1,7 +1,8 @@
 ## ocamlbrew - A tool for managing OCaml installations in $HOME
 
 ocamlbrew aims to be a simple tool for getting up and running with various
-versions of [OCaml][].  This script should be considered to be in an early alpha
+versions of [OCaml][].  The concept, along with some basic code, is borrowed
+from [perlbrew][].  This script should be considered to be in an early alpha
 state.
 
 ### Requirements
@@ -67,3 +68,4 @@ those instructions, depending on the options selected at ocamlbrew startup, the
 [React]: http://erratique.ch/software/react
 [Lwt]: http://ocsigen.org/lwt/
 [utop]: http://forge.ocamlcore.org/projects/utop/
+[perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
