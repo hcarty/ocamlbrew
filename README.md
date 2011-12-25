@@ -69,3 +69,4 @@ those instructions, depending on the options selected at ocamlbrew startup, the
 [Lwt]: http://ocsigen.org/lwt/
 [utop]: http://forge.ocamlcore.org/projects/utop/
 [perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
+[PCRE]: http://www.pcre.org/
