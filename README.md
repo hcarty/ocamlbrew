@@ -20,6 +20,7 @@ state.
 Using ocamlbrew is very easy.  It can be run in a completely automated fashion:
 
     # Optionally setting $OCAMLBREW_BASE and/or $OCAMLBREW_LOGFILE first
+    # This is equivalent to running "ocamlbrew --all"
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
 Or it can be run by hand:
@@ -28,7 +29,7 @@ Or it can be run by hand:
     cd /tmp
     curl -O https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew
     # ... and run, again, optionally configuring the environment first
-    ./ocamlbrew
+    bash ocamlbrew
 
 You will be provided with several prompts asking which software to install.
 [OCaml][] is always installed, with [findlib][], [oasis][], [Batteries][] and
@@ -50,6 +51,9 @@ ocamlbrew can be configured with several environment variables.
 * `$OCAMLBREW_LOGFILE`  
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `/tmp`.
+
+Some command line arguments are available.  See `ocamlbrew --help` for more
+information.
 
 #### After installation
 
