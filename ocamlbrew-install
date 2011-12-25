@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Derived from perlbrew-install
+
+OCAMLBREWURL=https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew
+: ${OCAMLBREW_BASE=$HOME/ocamlbrew}
+
+if [ -z "$TMPDIR" ]; then
+    if [ -d "/tmp" ]; then
+        TMPDIR="/tmp"
+    else
+        TMPDIR="."
+    fi
+fi
+
+cd $TMPDIR || exit 1
+
+LOCALINSTALLER="ocamlbrew-$$"
+
+echo
+if type curl >/dev/null 2>&1; then
+  OCAMLBREWDOWNLOAD="curl -k -f -sS -Lo $LOCALINSTALLER $OCAMLBREWURL"
+elif type wget >/dev/null 2>&1; then
+  OCAMLBREWDOWNLOAD="wget --no-check-certificate -nv -O $LOCALINSTALLER $OCAMLBREWURL"
+else
+  echo "Need wget or curl to use $0"
+  exit 1
+fi
+
+clean_exit () {
+  [ -f $LOCALINSTALLER ] && rm $LOCALINSTALLER
+  exit $1
+}
+
+echo "## Download the latest ocamlbrew"
+$OCAMLBREWDOWNLOAD || clean_exit 1
+
+echo
+echo "## Starting ocamlbrew"
+chmod +x $LOCALINSTALLER
+./$LOCALINSTALLER --all || clean_exit 1
+
+echo
+echo "## Done."
+rm ./$LOCALINSTALLER
+
