@@ -5,6 +5,34 @@ set -u
 # Quit on errors
 set -e
 
+help_then_exit() {
+    echo Usage: "$0" [flags]
+    echo
+    echo "Possible flags:"
+    echo "--help   Display this message"
+    echo "--all    Install everything with no prompts"
+    exit 1
+}
+
+# Handle command line arguments
+if [ $# -eq 0 ]; then
+    INSTALL_ALL="false"
+elif [ $# -eq 1 ]; then
+    case "$1" in
+        --help)
+            help_then_exit ;;
+        --all)
+            INSTALL_ALL="true"
+            ;;
+        *)
+            help_then_exit ;;
+    esac
+elif [ $# -gt 1 ]; then
+    help_then_exit
+else
+    help_then_exit
+fi
+
 # Set configuration options such as installation and build locations here
 
 # The version of OCaml we are installing and download URL
@@ -42,36 +70,44 @@ echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBR
 echo Output will be written to "$OCAMLBREW_LOGFILE"
 echo
 
-# Ask the user what components they would like to install
-read -p "Would you like to install findlib? (y/n) "
-if [ "${REPLY,,}" != "y" ]; then
-    FINDLIB_INSTALL="false"
-    ODB_INSTALL="false"
-    OASIS_INSTALL="false"
-    UTOP_INSTALL="false"
-    BATTERIES_INSTALL="false"
-else
-    FINDLIB_INSTALL="true"
-    ODB_INSTALL="true"
-    read -p "Would you like to install oasis? (y/n) "
-    if [ "${REPLY,,}" = "y" ]; then
-        OASIS_INSTALL="true"
-    else
+FINDLIB_INSTALL="true"
+ODB_INSTALL="true"
+OASIS_INSTALL="true"
+UTOP_INSTALL="true"
+BATTERIES_INSTALL="true"
+
+if [ "$INSTALL_ALL" != "true" ]; then
+    # Ask the user what components they would like to install
+    read -p "Would you like to install findlib? (y/n) "
+    if [ "${REPLY,,}" != "y" ]; then
+        FINDLIB_INSTALL="false"
+        ODB_INSTALL="false"
         OASIS_INSTALL="false"
-    fi
-
-    read -p "Would you like to install utop? (y/n) "
-    if [ "${REPLY,,}" = "y" ]; then
-        UTOP_INSTALL="true"
-    else
         UTOP_INSTALL="false"
-    fi
-
-    read -p "Would you like to install Batteries? (y/n) "
-    if [ "${REPLY,,}" = "y" ]; then
-        BATTERIES_INSTALL="true"
-    else
         BATTERIES_INSTALL="false"
+    else
+        FINDLIB_INSTALL="true"
+        ODB_INSTALL="true"
+        read -p "Would you like to install oasis? (y/n) "
+        if [ "${REPLY,,}" = "y" ]; then
+            OASIS_INSTALL="true"
+        else
+            OASIS_INSTALL="false"
+        fi
+
+        read -p "Would you like to install utop? (y/n) "
+        if [ "${REPLY,,}" = "y" ]; then
+            UTOP_INSTALL="true"
+        else
+            UTOP_INSTALL="false"
+        fi
+
+        read -p "Would you like to install Batteries? (y/n) "
+        if [ "${REPLY,,}" = "y" ]; then
+            BATTERIES_INSTALL="true"
+        else
+            BATTERIES_INSTALL="false"
+        fi
     fi
 fi
 
@@ -85,11 +121,13 @@ if "$UTOP_INSTALL" = "true"; then echo and install utop; fi
 if "$BATTERIES_INSTALL" = "true"; then echo and install Batteries; fi
 echo
 
-read -p "Continue (y/n)? "
-if [ "${REPLY,,}" != "y" ]; then
-    echo Exiting...
-    rm -f "$OCAMLBREW_LOGFILE"
-    exit 1
+if [ "$INSTALL_ALL" != "true" ]; then
+    read -p "Continue (y/n)? "
+    if [ "${REPLY,,}" != "y" ]; then
+        echo Exiting...
+        rm -f "$OCAMLBREW_LOGFILE"
+        exit 1
+    fi
 fi
 
 {
