@@ -19,7 +19,7 @@ state.
 
 Using ocamlbrew is very easy.  It can be run in a completely automated fashion:
 
-    # Optionally setting $OCAMLBREW_BASE and/or $OCAMLBREW_LOGFILE first
+    # Set $OCAMLBREW_BASE and/or $OCAMLBREW_LOGFILE first to customize
     # This is equivalent to running "ocamlbrew --all"
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
@@ -28,7 +28,7 @@ Or it can be run by hand:
     # Download...
     cd /tmp
     curl -O https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew
-    # ... and run, again, optionally configuring the environment first
+    # ... and run, optionally configuring the environment first
     bash ocamlbrew
 
 You will be provided with several prompts asking which software to install.
