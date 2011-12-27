@@ -14,6 +14,16 @@ help_then_exit() {
     exit 1
 }
 
+handle_error() {
+    echo Something errored out, please check the log file for details:
+    echo "$OCAMLBREW_LOGFILE"
+    echo Exiting...
+}
+
+# Print out a message to let the user know they should check the output log
+# when an error occurs
+trap "handle_error" ERR
+
 # Handle command line arguments
 if [ $# -eq 0 ]; then
     INSTALL_ALL="false"
