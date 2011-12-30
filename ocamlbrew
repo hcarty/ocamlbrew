@@ -9,8 +9,12 @@ help_then_exit() {
     echo Usage: "$0" [flags]
     echo
     echo "Possible flags:"
-    echo "--help   Display this message"
-    echo "--all    Install everything with no prompts"
+    echo "-h         Display this message"
+    echo "-a         Install everything with no prompts"
+    echo "-s [path]  Install from OCaml Subversion"
+    echo "-t         Install from OCaml Subversion trunk"
+    echo
+    echo "Subversion path should be relative to svn/ocaml/"
     exit 1
 }
 
@@ -24,26 +28,33 @@ handle_error() {
 # when an error occurs
 trap "handle_error" ERR
 
+INSTALL_ALL="false"
+: ${OCAMLBREW_INSTALL_SVN="false"}
 # Handle command line arguments
-if [ $# -eq 0 ]; then
-    INSTALL_ALL="false"
-elif [ $# -eq 1 ]; then
-    case "$1" in
-        --help)
+while getopts "has:t" OPTION; do
+    case $OPTION in
+        h)
             help_then_exit ;;
-        --all)
+        a)
             INSTALL_ALL="true"
             ;;
-        *)
+        s)
+            OCAMLBREW_INSTALL_SVN="true"
+            OCAMLBREW_SVN_PATH="$OPTARG"
+            ;;
+        t)
+            OCAMLBREW_INSTALL_SVN="true"
+            ;;
+        ?)
             help_then_exit ;;
     esac
-elif [ $# -gt 1 ]; then
-    help_then_exit
-else
-    help_then_exit
-fi
+done
 
 # Set configuration options such as installation and build locations here
+
+# OCaml from Subversion
+OCAML_SVN_ROOT="http://caml.inria.fr/svn/ocaml/"
+: ${OCAMLBREW_SVN_PATH=trunk}
 
 # The version of OCaml we are installing and download URL
 : ${OCAML_MAJOR_VERSION=3}
@@ -61,7 +72,11 @@ fi
 
 # Installation prefix for the software being installed
 : ${OCAMLBREW_BASE=$HOME/ocamlbrew}
-OCAML_BASE="$OCAMLBREW_BASE"/ocaml-$OCAML_VERSION
+if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+    OCAML_BASE="$OCAMLBREW_BASE"/ocaml-svn/"$OCAMLBREW_SVN_PATH"
+else
+    OCAML_BASE="$OCAMLBREW_BASE"/ocaml-"$OCAML_VERSION"
+fi
 # Parent directory where software will be built
 : ${BUILD_DIR="$OCAML_BASE"/build}
 
@@ -75,7 +90,13 @@ OCAML_BASE="$OCAMLBREW_BASE"/ocaml-$OCAML_VERSION
 # Main entry point
 echo Welcome to ocamlbrew!
 echo
-echo Working with $OCAML_URL | tee -a "$OCAMLBREW_LOGFILE"
+{
+if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+    echo Working with "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH"
+else
+    echo Working with "$OCAML_URL"
+fi
+} | tee -a "$OCAMLBREW_LOGFILE"
 echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBREW_LOGFILE"
 echo Output will be written to "$OCAMLBREW_LOGFILE"
 echo
@@ -149,12 +170,20 @@ pushd "$BUILD_DIR"
 # OCaml
 
 echo Retrieving OCaml | tee -a "$OCAMLBREW_LOGFILE"
-curl -O "$OCAML_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
-
-echo Extracting and building OCaml | tee -a "$OCAMLBREW_LOGFILE"
 {
-tar xzf ocaml-$OCAML_VERSION.tar.gz
-cd ocaml-$OCAML_VERSION
+if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+    mkdir build
+    svn checkout "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH" build
+    cd build
+else
+    curl -O "$OCAML_URL"
+    tar xzf ocaml-$OCAML_VERSION.tar.gz
+    cd ocaml-$OCAML_VERSION
+fi
+} >> "$OCAMLBREW_LOGFILE" 2>&1
+
+echo Building OCaml | tee -a "$OCAMLBREW_LOGFILE"
+{
 ./configure -prefix "$OCAML_BASE"
 make world.opt
 } >> "$OCAMLBREW_LOGFILE" 2>&1
@@ -170,6 +199,7 @@ mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/utils
 cp typing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/typing/
 cp parsing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing/
 cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/
+cd ..
 } >> "$OCAMLBREW_LOGFILE" 2>&1
 
 # Setup the path so that OCaml is visible

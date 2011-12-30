@@ -38,7 +38,7 @@ $OCAMLBREWDOWNLOAD || clean_exit 1
 echo
 echo "## Starting ocamlbrew"
 chmod +x $LOCALINSTALLER
-./$LOCALINSTALLER --all || clean_exit 1
+./$LOCALINSTALLER -a || clean_exit 1
 
 echo
 echo "## Done."

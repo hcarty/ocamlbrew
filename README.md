@@ -52,7 +52,7 @@ ocamlbrew can be configured with several environment variables.
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `/tmp`.
 
-Some command line arguments are available.  See `ocamlbrew --help` for more
+Some command line arguments are available.  See `ocamlbrew -h` for more
 information.
 
 #### After installation
