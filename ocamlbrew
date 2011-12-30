@@ -110,7 +110,8 @@ BATTERIES_INSTALL="true"
 if [ "$INSTALL_ALL" != "true" ]; then
     # Ask the user what components they would like to install
     read -p "Would you like to install findlib? (y/n) "
-    if [ "${REPLY,,}" != "y" ]; then
+    reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+    if [ "$reply_lower" != "y" ]; then
         FINDLIB_INSTALL="false"
         ODB_INSTALL="false"
         OASIS_INSTALL="false"
@@ -120,21 +121,24 @@ if [ "$INSTALL_ALL" != "true" ]; then
         FINDLIB_INSTALL="true"
         ODB_INSTALL="true"
         read -p "Would you like to install oasis? (y/n) "
-        if [ "${REPLY,,}" = "y" ]; then
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" = "y" ]; then
             OASIS_INSTALL="true"
         else
             OASIS_INSTALL="false"
         fi
 
         read -p "Would you like to install utop? (y/n) "
-        if [ "${REPLY,,}" = "y" ]; then
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" = "y" ]; then
             UTOP_INSTALL="true"
         else
             UTOP_INSTALL="false"
         fi
 
         read -p "Would you like to install Batteries? (y/n) "
-        if [ "${REPLY,,}" = "y" ]; then
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" = "y" ]; then
             BATTERIES_INSTALL="true"
         else
             BATTERIES_INSTALL="false"
@@ -154,7 +158,8 @@ echo
 
 if [ "$INSTALL_ALL" != "true" ]; then
     read -p "Continue (y/n)? "
-    if [ "${REPLY,,}" != "y" ]; then
+    reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+    if [ "reply_lower" != "y" ]; then
         echo Exiting...
         rm -f "$OCAMLBREW_LOGFILE"
         exit 1
