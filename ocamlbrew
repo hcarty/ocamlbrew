@@ -159,7 +159,7 @@ echo
 if [ "$INSTALL_ALL" != "true" ]; then
     read -p "Continue (y/n)? "
     reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-    if [ "reply_lower" != "y" ]; then
+    if [ "$reply_lower" != "y" ]; then
         echo Exiting...
         rm -f "$OCAMLBREW_LOGFILE"
         exit 1
