@@ -19,8 +19,9 @@ state.
 
 Using ocamlbrew is very easy.  It can be run in a completely automated fashion:
 
-    # Set $OCAMLBREW_BASE and/or $OCAMLBREW_LOGFILE first to customize
-    # This is equivalent to running "ocamlbrew --all"
+    # Set one or more of $OCAMLBREW_BASE, $OCAMLBREW_LOGFILE, and
+    # $OCAMLBREW_FLAGS first to customize
+    # This is equivalent to running "ocamlbrew -a" otherwise
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
 Or it can be run by hand:
@@ -45,12 +46,15 @@ fails.
 ocamlbrew can be configured with several environment variables.
 
 * `$OCAMLBREW_BASE`  
-  The most important is `$OCAMLBREW_BASE` which defines the directory under which all
-  software built and installed by ocamlbrew will reside.  `$OCAMLBREW_BASE`
-  defaults to `$HOME/ocamlbrew`.
+  The most important is `$OCAMLBREW_BASE` which defines the directory under
+  which all software built and installed by ocamlbrew will reside.
+  `$OCAMLBREW_BASE` defaults to `$HOME/ocamlbrew`.
 * `$OCAMLBREW_LOGFILE`  
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `/tmp`.
+* `$OCAMLBREW_FLAGS`  
+  This is only for the download-less installation.  Specify which flags to pass
+  to `ocamlbrew`.  `$OCAMLBREW_FLAGS` defaults to `-a`.
 
 Some command line arguments are available.  See `ocamlbrew -h` for more
 information.
