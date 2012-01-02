@@ -5,6 +5,9 @@
 OCAMLBREWURL=https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew
 : ${OCAMLBREW_BASE=$HOME/ocamlbrew}
 
+# Default command line flags
+: ${OCAMLBREW_FLAGS="-a"}
+
 if [ -z "$TMPDIR" ]; then
     if [ -d "/tmp" ]; then
         TMPDIR="/tmp"
@@ -38,7 +41,7 @@ $OCAMLBREWDOWNLOAD || clean_exit 1
 echo
 echo "## Starting ocamlbrew"
 chmod +x $LOCALINSTALLER
-./$LOCALINSTALLER -a || clean_exit 1
+./$LOCALINSTALLER $OCAMLBREW_FLAGS || clean_exit 1
 
 echo
 echo "## Done."
