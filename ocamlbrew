@@ -89,6 +89,7 @@ greet() {
     OASIS_INSTALL="false"
     UTOP_INSTALL="false"
     BATTERIES_INSTALL="false"
+    OCAMLSCRIPT_INSTALL="false"
     if [ "$INSTALL_ALL" = "true" ]; then
         SHOW_CONTINUE_PROMPT="false"
         FINDLIB_INSTALL="true"
@@ -96,6 +97,7 @@ greet() {
         OASIS_INSTALL="true"
         UTOP_INSTALL="true"
         BATTERIES_INSTALL="true"
+        OCAMLSCRIPT_INSTALL="true"
     elif [ "$INSTALL_OCAML_ONLY" = "true" ]; then
         # Nothing to do, the defaults get us here
         SHOW_CONTINUE_PROMPT="false"
@@ -114,6 +116,7 @@ greet() {
             OASIS_INSTALL="false"
             UTOP_INSTALL="false"
             BATTERIES_INSTALL="false"
+            OCAMLSCRIPT_INSTALL="false"
         else
             FINDLIB_INSTALL="true"
             ODB_INSTALL="true"
@@ -140,6 +143,14 @@ greet() {
             else
                 BATTERIES_INSTALL="false"
             fi
+
+            read -p "Would you like to install ocamlscript? (y/n) "
+            reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+            if [ "$reply_lower" = "y" ]; then
+                OCAMLSCRIPT_INSTALL="true"
+            else
+                OCAMLSCRIPT_INSTALL="false"
+            fi
         fi
     fi
 
@@ -151,6 +162,7 @@ greet() {
     if "$OASIS_INSTALL" = "true"; then echo and install oasis; fi
     if "$UTOP_INSTALL" = "true"; then echo and install utop; fi
     if "$BATTERIES_INSTALL" = "true"; then echo and install Batteries; fi
+    if "$OCAMLSCRIPT_INSTALL" = "true"; then echo and install ocamlscript; fi
     echo
 
     if [ "$SHOW_CONTINUE_PROMPT" = "true" ]; then
@@ -418,6 +430,12 @@ fi
 if [ "$BATTERIES_INSTALL" = "true" ]; then
     echo Installing Batteries using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
     install_with_odb "batteries" >> "$OCAMLBREW_LOGFILE" 2>&1
+fi
+
+# ocamlscript
+if [ "$OCAMLSCRIPT_INSTALL" = "true" ]; then
+    echo Installing ocamlscript using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
+    install_with_odb "ocamlscript" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # All done!
