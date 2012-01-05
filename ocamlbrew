@@ -5,6 +5,9 @@ set -u
 # Quit on errors
 set -e
 
+#
+# Display usage message then quit
+#
 help_then_exit() {
     echo Usage: "$0" [flags]
     echo
@@ -21,329 +24,406 @@ help_then_exit() {
     exit 1
 }
 
+#
+# Print a message when quitting
+#
 handle_error() {
     echo Something errored out, please check the log file for details:
     echo "$OCAMLBREW_LOGFILE"
     echo Exiting...
 }
 
+#
+# Handle command line arguments
+#
+parse_opts() {
+    while getopts "haofs:tn:" OPTION; do
+        case $OPTION in
+            h)
+                help_then_exit ;;
+            a)
+                INSTALL_ALL="true"
+                ;;
+            o)
+                INSTALL_OCAML_ONLY="true"
+                ;;
+            f)
+                INSTALL_OCAML_FINDLIB_ONLY="true"
+                ;;
+            s)
+                OCAMLBREW_INSTALL_SVN="true"
+                OCAMLBREW_SVN_PATH="$OPTARG"
+                ;;
+            t)
+                OCAMLBREW_INSTALL_SVN="true"
+                ;;
+            n)
+                OCAMLBREW_NAME="$OPTARG"
+                ;;
+            ?)
+                help_then_exit ;;
+        esac
+    done
+}
+
+#
+# Display greeting, optional prompts, and summary message
+#
+greet() {
+    echo Welcome to ocamlbrew!
+    echo
+    {
+    if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+        echo Working with "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH"
+    else
+        echo Working with "$OCAML_URL"
+    fi
+    } | tee -a "$OCAMLBREW_LOGFILE"
+    echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBREW_LOGFILE"
+    echo Output will be written to "$OCAMLBREW_LOGFILE"
+    echo
+
+    SHOW_CONTINUE_PROMPT="true"
+    FINDLIB_INSTALL="false"
+    ODB_INSTALL="false"
+    OASIS_INSTALL="false"
+    UTOP_INSTALL="false"
+    BATTERIES_INSTALL="false"
+    if [ "$INSTALL_ALL" = "true" ]; then
+        SHOW_CONTINUE_PROMPT="false"
+        FINDLIB_INSTALL="true"
+        ODB_INSTALL="true"
+        OASIS_INSTALL="true"
+        UTOP_INSTALL="true"
+        BATTERIES_INSTALL="true"
+    elif [ "$INSTALL_OCAML_ONLY" = "true" ]; then
+        # Nothing to do, the defaults get us here
+        SHOW_CONTINUE_PROMPT="false"
+        OCAML_ONLY="true"
+    elif [ "$INSTALL_OCAML_FINDLIB_ONLY" = "true" ]; then
+        SHOW_CONTINUE_PROMPT="false"
+        FINDLIB_INSTALL="true"
+        ODB_INSTALL="true"
+    else
+        # Ask the user what components they would like to install
+        read -p "Would you like to install findlib? (y/n) "
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" != "y" ]; then
+            FINDLIB_INSTALL="false"
+            ODB_INSTALL="false"
+            OASIS_INSTALL="false"
+            UTOP_INSTALL="false"
+            BATTERIES_INSTALL="false"
+        else
+            FINDLIB_INSTALL="true"
+            ODB_INSTALL="true"
+            read -p "Would you like to install oasis? (y/n) "
+            reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+            if [ "$reply_lower" = "y" ]; then
+                OASIS_INSTALL="true"
+            else
+                OASIS_INSTALL="false"
+            fi
+
+            read -p "Would you like to install utop? (y/n) "
+            reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+            if [ "$reply_lower" = "y" ]; then
+                UTOP_INSTALL="true"
+            else
+                UTOP_INSTALL="false"
+            fi
+
+            read -p "Would you like to install Batteries? (y/n) "
+            reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+            if [ "$reply_lower" = "y" ]; then
+                BATTERIES_INSTALL="true"
+            else
+                BATTERIES_INSTALL="false"
+            fi
+        fi
+    fi
+
+    # Print a summary of what we are going to do, then continue
+    echo This script is about to:
+    echo Install OCaml
+    if "$FINDLIB_INSTALL" = "true"; then echo and install findlib; fi
+    if "$ODB_INSTALL" = "true"; then echo and install odb; fi
+    if "$OASIS_INSTALL" = "true"; then echo and install oasis; fi
+    if "$UTOP_INSTALL" = "true"; then echo and install utop; fi
+    if "$BATTERIES_INSTALL" = "true"; then echo and install Batteries; fi
+    echo
+
+    if [ "$SHOW_CONTINUE_PROMPT" = "true" ]; then
+        read -p "Continue (y/n)? "
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" != "y" ]; then
+            echo Exiting...
+            rm -f "$OCAMLBREW_LOGFILE"
+            exit 1
+        fi
+    fi
+}
+
+#
+# Create the build directory
+#
+setup_build_dir() {
+    # Create and move to the build directory
+    mkdir -p "$BUILD_DIR"
+    pushd "$BUILD_DIR"
+}
+
+#
+# Handle OCaml brewing
+#
+brew_ocaml() {
+    case $1 in
+        retrieve)
+            if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+                mkdir build
+                svn checkout "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH" build
+                cd build
+            else
+                curl -O "$OCAML_URL"
+                tar xzf ocaml-$OCAML_VERSION.tar.gz
+                cd ocaml-$OCAML_VERSION
+            fi
+            ;;
+        build)
+            ./configure -prefix "$OCAML_BASE"
+            make world.opt
+            ;;
+        install)
+            make install
+            # Install the compiler libraries as well.  They are needed for utop and some
+            # other projects.
+            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/typing
+            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing
+            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/utils
+            cp typing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/typing/
+            cp parsing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing/
+            cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/
+            cd ..
+            ;;
+    esac
+}
+
+#
+# Handle findlib brewing
+#
+brew_findlib() {
+    case $1 in
+        retrieve)
+            curl -O "$FINDLIB_URL"
+            ;;
+        build)
+            tar xzf findlib-$FINDLIB_VERSION.tar.gz
+            cd findlib-$FINDLIB_VERSION
+            ./configure
+            make all opt
+            ;;
+        install)
+            make install
+            # Extra configuration for OCaml libraries with C stubs, as recommended by the
+            # findlib documentation.
+            mkdir `ocamlfind printconf destdir`/stublibs
+            echo `ocamlfind printconf destdir`/stublibs >> `ocamlfind printconf ldconf`
+            ;;
+    esac
+}
+
+#
+# Handle odb brewing
+#
+brew_odb() {
+    case $1 in
+        retrieve)
+            cd "$OCAML_BASE"/bin
+            curl -O https://raw.github.com/thelema/odb/master/odb.ml
+            chmod +x odb.ml
+            ;;
+        configure)
+            cd "$OCAML_BASE"/etc
+            curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
+            set +u
+            export ODB_BUILD_DIR="$ODB_BUILD_DIR"
+            export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
+            source odb.bashrc
+            set -u
+            mkdir -p "$ODB_BUILD_DIR"
+            mkdir -p "$ODB_INSTALL_DIR"
+
+            # Create a sourceable environment
+            {
+            echo export ODB_BUILD_DIR="$ODB_BUILD_DIR"
+            echo export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
+            echo source "$OCAML_BASE"/etc/odb.bashrc
+            } >> "$OCAML_BASE"/etc/ocamlbrew.bashrc
+            ;;
+    esac
+}
+
+#
+# Install packages with odb, potentially with some extra setup
+#
+install_with_odb() {
+    case $1 in
+        oasis)
+            odb.ml oUnit fileutils
+            odb.ml oasis
+            ;;
+        utop)
+            # React is an optional dependency of Lwt
+            odb.ml react
+            # Make sure Lwt is built with React support
+            odb.ml --configure-flags --enable-react lwt
+            odb.ml utop
+            ;;
+        *)
+            odb.ml "$1"
+            ;;
+    esac
+}
+
+#
+# Initialize lots and lots of global build and installation variables
+#
+init_variables() {
+    # Root for Subversion checkouts
+    OCAML_SVN_ROOT="http://caml.inria.fr/svn/ocaml/"
+    # Installation prefix for the software being installed
+    : ${OCAMLBREW_BASE="$HOME"/ocamlbrew}
+    # By default, there is no custom OCaml installation directory name
+    : ${OCAMLBREW_NAME=""}
+    # Specific installation set options
+    INSTALL_ALL="false"
+    INSTALL_OCAML_ONLY="false"
+    INSTALL_OCAML_FINDLIB_ONLY="false"
+    : ${OCAMLBREW_INSTALL_SVN="false"}
+
+    # Set configuration options such as installation and build locations here
+
+    # OCaml from Subversion
+    : ${OCAMLBREW_SVN_PATH=trunk}
+
+    # The version of OCaml we are installing and download URL
+    : ${OCAML_MAJOR_VERSION=3}
+    : ${OCAML_MINOR_VERSION=12}
+    : ${OCAML_PATCH_VERSION=1}
+    : ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
+    : ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
+
+    # findlib version we are installing and download URL
+    : ${FINDLIB_MAJOR_VERSION=1}
+    : ${FINDLIB_MINOR_VERSION=2}
+    : ${FINDLIB_PATCH_VERSION=7}
+    : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
+    : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
+
+    if [ "$OCAMLBREW_NAME" != "" ]; then
+        # Install path based on a custom directory name
+        OCAML_BASE="$OCAMLBREW_BASE"/"$OCAMLBREW_NAME"
+    elif [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+        # Install path based on location in the Subversion tree
+        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-svn/"$OCAMLBREW_SVN_PATH"
+    else
+        # Install path based on release version of OCaml
+        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-"$OCAML_VERSION"
+    fi
+    # Parent directory where software will be built
+    : ${BUILD_DIR="$OCAML_BASE"/build}
+
+    # odb paths
+    : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
+    : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
+
+    # Output will be redirected to this file
+    : ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
+}
+
+#
+# Print a friendly closing message
+#
+closing_message() {
+    echo
+    echo "You may want to add the following line to your ~/.bashrc so that OCaml is
+readily available to use:
+
+source $OCAML_BASE/etc/ocamlbrew.bashrc
+
+Enjoy!"
+}
+
 # Print out a message to let the user know they should check the output log
 # when an error occurs
 trap "handle_error" ERR
 
-# Root for Subversion checkouts
-OCAML_SVN_ROOT="http://caml.inria.fr/svn/ocaml/"
-# Installation prefix for the software being installed
-: ${OCAMLBREW_BASE="$HOME"/ocamlbrew}
-# By default, there is no custom OCaml installation directory name
-: ${OCAMLBREW_NAME=""}
-# Specific installation set options
-INSTALL_ALL="false"
-INSTALL_OCAML_ONLY="false"
-INSTALL_OCAML_FINDLIB_ONLY="false"
-: ${OCAMLBREW_INSTALL_SVN="false"}
-# Handle command line arguments
-while getopts "haofs:tn:" OPTION; do
-    case $OPTION in
-        h)
-            help_then_exit ;;
-        a)
-            INSTALL_ALL="true"
-            ;;
-        o)
-            INSTALL_OCAML_ONLY="true"
-            ;;
-        f)
-            INSTALL_OCAML_FINDLIB_ONLY="true"
-            ;;
-        s)
-            OCAMLBREW_INSTALL_SVN="true"
-            OCAMLBREW_SVN_PATH="$OPTARG"
-            ;;
-        t)
-            OCAMLBREW_INSTALL_SVN="true"
-            ;;
-        n)
-            OCAMLBREW_NAME="$OPTARG"
-            ;;
-        ?)
-            help_then_exit ;;
-    esac
-done
+###################################
+# This is where the magic begins! #
+###################################
 
-# Set configuration options such as installation and build locations here
-
-# OCaml from Subversion
-: ${OCAMLBREW_SVN_PATH=trunk}
-
-# The version of OCaml we are installing and download URL
-: ${OCAML_MAJOR_VERSION=3}
-: ${OCAML_MINOR_VERSION=12}
-: ${OCAML_PATCH_VERSION=1}
-: ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
-: ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
-
-# findlib version we are installing and download URL
-: ${FINDLIB_MAJOR_VERSION=1}
-: ${FINDLIB_MINOR_VERSION=2}
-: ${FINDLIB_PATCH_VERSION=7}
-: ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
-: ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
-
-if [ "$OCAMLBREW_NAME" != "" ]; then
-    # Install path based on a custom directory name
-    OCAML_BASE="$OCAMLBREW_BASE"/"$OCAMLBREW_NAME"
-elif [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
-    # Install path based on location in the Subversion tree
-    OCAML_BASE="$OCAMLBREW_BASE"/ocaml-svn/"$OCAMLBREW_SVN_PATH"
-else
-    # Install path based on release version of OCaml
-    OCAML_BASE="$OCAMLBREW_BASE"/ocaml-"$OCAML_VERSION"
-fi
-# Parent directory where software will be built
-: ${BUILD_DIR="$OCAML_BASE"/build}
-
-# odb paths
-: ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
-: ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
-
-# Output will be redirected to this file
-: ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
-
-# Main entry point
-echo Welcome to ocamlbrew!
-echo
-{
-if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
-    echo Working with "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH"
-else
-    echo Working with "$OCAML_URL"
-fi
-} | tee -a "$OCAMLBREW_LOGFILE"
-echo Software will be built and installed under "$OCAML_BASE" | tee -a "$OCAMLBREW_LOGFILE"
-echo Output will be written to "$OCAMLBREW_LOGFILE"
-echo
-
-SHOW_CONTINUE_PROMPT="true"
-FINDLIB_INSTALL="false"
-ODB_INSTALL="false"
-OASIS_INSTALL="false"
-UTOP_INSTALL="false"
-BATTERIES_INSTALL="false"
-if [ "$INSTALL_ALL" = "true" ]; then
-    SHOW_CONTINUE_PROMPT="false"
-    FINDLIB_INSTALL="true"
-    ODB_INSTALL="true"
-    OASIS_INSTALL="true"
-    UTOP_INSTALL="true"
-    BATTERIES_INSTALL="true"
-elif [ "$INSTALL_OCAML_ONLY" = "true" ]; then
-    # Nothing to do, the defaults get us here
-    SHOW_CONTINUE_PROMPT="false"
-    OCAML_ONLY="true"
-elif [ "$INSTALL_OCAML_FINDLIB_ONLY" = "true" ]; then
-    SHOW_CONTINUE_PROMPT="false"
-    FINDLIB_INSTALL="true"
-    ODB_INSTALL="true"
-else
-    # Ask the user what components they would like to install
-    read -p "Would you like to install findlib? (y/n) "
-    reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-    if [ "$reply_lower" != "y" ]; then
-        FINDLIB_INSTALL="false"
-        ODB_INSTALL="false"
-        OASIS_INSTALL="false"
-        UTOP_INSTALL="false"
-        BATTERIES_INSTALL="false"
-    else
-        FINDLIB_INSTALL="true"
-        ODB_INSTALL="true"
-        read -p "Would you like to install oasis? (y/n) "
-        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-        if [ "$reply_lower" = "y" ]; then
-            OASIS_INSTALL="true"
-        else
-            OASIS_INSTALL="false"
-        fi
-
-        read -p "Would you like to install utop? (y/n) "
-        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-        if [ "$reply_lower" = "y" ]; then
-            UTOP_INSTALL="true"
-        else
-            UTOP_INSTALL="false"
-        fi
-
-        read -p "Would you like to install Batteries? (y/n) "
-        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-        if [ "$reply_lower" = "y" ]; then
-            BATTERIES_INSTALL="true"
-        else
-            BATTERIES_INSTALL="false"
-        fi
-    fi
-fi
-
-# Print a summary of what we are going to do, then continue
-echo This script is about to:
-echo Install OCaml
-if "$FINDLIB_INSTALL" = "true"; then echo and install findlib; fi
-if "$ODB_INSTALL" = "true"; then echo and install odb; fi
-if "$OASIS_INSTALL" = "true"; then echo and install oasis; fi
-if "$UTOP_INSTALL" = "true"; then echo and install utop; fi
-if "$BATTERIES_INSTALL" = "true"; then echo and install Batteries; fi
-echo
-
-if [ "$SHOW_CONTINUE_PROMPT" = "true" ]; then
-    read -p "Continue (y/n)? "
-    reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
-    if [ "$reply_lower" != "y" ]; then
-        echo Exiting...
-        rm -f "$OCAMLBREW_LOGFILE"
-        exit 1
-    fi
-fi
-
-{
-# Create and move to the build directory
-mkdir -p "$BUILD_DIR"
-pushd "$BUILD_DIR"
-} >> "$OCAMLBREW_LOGFILE" 2>&1
+# Preparation
+init_variables
+parse_opts "$@"
+greet
+setup_build_dir >> "$OCAMLBREW_LOGFILE" 2>&1
 
 # OCaml
-
 echo Retrieving OCaml | tee -a "$OCAMLBREW_LOGFILE"
-{
-if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
-    mkdir build
-    svn checkout "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH" build
-    cd build
-else
-    curl -O "$OCAML_URL"
-    tar xzf ocaml-$OCAML_VERSION.tar.gz
-    cd ocaml-$OCAML_VERSION
-fi
-} >> "$OCAMLBREW_LOGFILE" 2>&1
-
+brew_ocaml "retrieve" >> "$OCAMLBREW_LOGFILE" 2>&1
 echo Building OCaml | tee -a "$OCAMLBREW_LOGFILE"
-{
-./configure -prefix "$OCAML_BASE"
-make world.opt
-} >> "$OCAMLBREW_LOGFILE" 2>&1
-
+brew_ocaml "build" >> "$OCAMLBREW_LOGFILE" 2>&1
 echo Installing OCaml | tee -a "$OCAMLBREW_LOGFILE"
-{
-make install
-# Install the compiler libraries as well.  They are needed for utop and some
-# other projects.
-mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/typing
-mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing
-mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/utils
-cp typing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/typing/
-cp parsing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing/
-cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/
-cd ..
-} >> "$OCAMLBREW_LOGFILE" 2>&1
+brew_ocaml "install" >> "$OCAMLBREW_LOGFILE" 2>&1
 
 # Setup the path so that OCaml is visible
 PATH="$OCAML_BASE"/bin:$PATH
+# Make sure we have an etc directory to put configuration files in
+mkdir -p "$OCAML_BASE"/etc >> "$OCAMLBREW_LOGFILE" 2>&1
+# Create a sourceable environment
+echo export PATH="$OCAML_BASE"/bin:\$PATH > "$OCAML_BASE"/etc/ocamlbrew.bashrc
 
 # findlib
 if [ "$FINDLIB_INSTALL" = "true" ]; then
     echo Retrieving findlib | tee -a "$OCAMLBREW_LOGFILE"
-    curl -O "$FINDLIB_URL" >> "$OCAMLBREW_LOGFILE" 2>&1
+    brew_findlib "retrieve" >> "$OCAMLBREW_LOGFILE" 2>&1
 
     echo Extracting and building findlib | tee -a "$OCAMLBREW_LOGFILE"
-    {
-    tar xzf findlib-$FINDLIB_VERSION.tar.gz
-    cd findlib-$FINDLIB_VERSION
-    ./configure
-    make all opt
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
+    brew_findlib "build" >> "$OCAMLBREW_LOGFILE" 2>&1
 
     echo Installing and configuring findlib | tee -a "$OCAMLBREW_LOGFILE"
-    {
-    make install
-    # Extra configuration for OCaml libraries with C stubs, as recommended by the
-    # findlib documentation.
-    mkdir `ocamlfind printconf destdir`/stublibs
-    echo `ocamlfind printconf destdir`/stublibs >> `ocamlfind printconf ldconf`
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
-else
-    # Make sure we have an etc directory to put configuration files in
-    {
-        mkdir -p "$OCAML_BASE"/etc
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
+    brew_findlib "install" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # odb
 if [ "$ODB_INSTALL" = "true" ]; then
     echo Retrieving the latest version of odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-    {
-    cd "$OCAML_BASE"/bin
-    curl -O https://raw.github.com/thelema/odb/master/odb.ml
-    chmod +x odb.ml
-    cd "$OCAML_BASE"/etc
-    curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
-    set +u
-    export ODB_BUILD_DIR="$ODB_BUILD_DIR"
-    export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
-    source odb.bashrc
-    set -u
-    mkdir -p "$ODB_BUILD_DIR"
-    mkdir -p "$ODB_INSTALL_DIR"
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
-
-    # Create a sourceable environment
-    {
-    echo export ODB_BUILD_DIR="$ODB_BUILD_DIR"
-    echo export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
-    echo export PATH="$OCAML_BASE"/bin:\$PATH
-    echo source "$OCAML_BASE"/etc/odb.bashrc
-    } > "$OCAML_BASE"/etc/ocamlbrew.bashrc
-else
-    # Create a sourceable environment
-    {
-        echo export PATH="$OCAML_BASE"/bin:\$PATH
-    } > "$OCAML_BASE"/etc/ocamlbrew.bashrc
+    brew_odb "retrieve" >> "$OCAMLBREW_LOGFILE" 2>&1
+    brew_odb "configure" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # oasis
 if [ "$OASIS_INSTALL" = "true" ]; then
     echo Installing oasis using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-    {
-    odb.ml oUnit fileutils
-    odb.ml oasis
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
+    install_with_odb "oasis" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # utop
 if [ "$UTOP_INSTALL" = "true" ]; then
     echo Installing utop using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-    {
-    # React is an optional dependency of Lwt
-    odb.ml react
-    # Make sure Lwt is built with React support
-    odb.ml --configure-flags --enable-react lwt
-    odb.ml utop
-    } >> "$OCAMLBREW_LOGFILE" 2>&1
+    install_with_odb "utop" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # Batteries
 if [ "$BATTERIES_INSTALL" = "true" ]; then
     echo Installing Batteries using odb.ml | tee -a "$OCAMLBREW_LOGFILE"
-    odb.ml batteries >> "$OCAMLBREW_LOGFILE" 2>&1
+    install_with_odb "batteries" >> "$OCAMLBREW_LOGFILE" 2>&1
 fi
 
 # All done!
 
 echo Done! | tee -a "$OCAMLBREW_LOGFILE"
 popd >> "$OCAMLBREW_LOGFILE" 2>&1
-echo
-echo "You may want to add the following line to your ~/.bashrc so that OCaml is
-readily available to use:
 
-source $OCAML_BASE/etc/ocamlbrew.bashrc
-
-Enjoy!"
+closing_message
 
