@@ -34,6 +34,62 @@ handle_error() {
 }
 
 #
+# Initialize lots and lots of global build and installation variables
+#
+init_variables() {
+    # Root for Subversion checkouts
+    OCAML_SVN_ROOT="http://caml.inria.fr/svn/ocaml/"
+    # Installation prefix for the software being installed
+    : ${OCAMLBREW_BASE="$HOME"/ocamlbrew}
+    # By default, there is no custom OCaml installation directory name
+    : ${OCAMLBREW_NAME=""}
+    # Specific installation set options
+    : ${INSTALL_ALL="false"}
+    : ${INSTALL_OCAML_ONLY="false"}
+    : ${INSTALL_OCAML_FINDLIB_ONLY="false"}
+    : ${OCAMLBREW_INSTALL_SVN="false"}
+
+    # Set configuration options such as installation and build locations here
+
+    # OCaml from Subversion
+    : ${OCAMLBREW_SVN_PATH=trunk}
+
+    # The version of OCaml we are installing and download URL
+    : ${OCAML_MAJOR_VERSION=3}
+    : ${OCAML_MINOR_VERSION=12}
+    : ${OCAML_PATCH_VERSION=1}
+    : ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
+    : ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
+
+    # findlib version we are installing and download URL
+    : ${FINDLIB_MAJOR_VERSION=1}
+    : ${FINDLIB_MINOR_VERSION=2}
+    : ${FINDLIB_PATCH_VERSION=7}
+    : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
+    : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
+
+    if [ "$OCAMLBREW_NAME" != "" ]; then
+        # Install path based on a custom directory name
+        OCAML_BASE="$OCAMLBREW_BASE"/"$OCAMLBREW_NAME"
+    elif [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
+        # Install path based on location in the Subversion tree
+        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-svn/"$OCAMLBREW_SVN_PATH"
+    else
+        # Install path based on release version of OCaml
+        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-"$OCAML_VERSION"
+    fi
+    # Parent directory where software will be built
+    : ${BUILD_DIR="$OCAML_BASE"/build}
+
+    # odb paths
+    : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
+    : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
+
+    # Output will be redirected to this file
+    : ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
+}
+
+#
 # Handle command line arguments
 #
 parse_opts() {
@@ -298,62 +354,6 @@ install_with_odb() {
 }
 
 #
-# Initialize lots and lots of global build and installation variables
-#
-init_variables() {
-    # Root for Subversion checkouts
-    OCAML_SVN_ROOT="http://caml.inria.fr/svn/ocaml/"
-    # Installation prefix for the software being installed
-    : ${OCAMLBREW_BASE="$HOME"/ocamlbrew}
-    # By default, there is no custom OCaml installation directory name
-    : ${OCAMLBREW_NAME=""}
-    # Specific installation set options
-    INSTALL_ALL="false"
-    INSTALL_OCAML_ONLY="false"
-    INSTALL_OCAML_FINDLIB_ONLY="false"
-    : ${OCAMLBREW_INSTALL_SVN="false"}
-
-    # Set configuration options such as installation and build locations here
-
-    # OCaml from Subversion
-    : ${OCAMLBREW_SVN_PATH=trunk}
-
-    # The version of OCaml we are installing and download URL
-    : ${OCAML_MAJOR_VERSION=3}
-    : ${OCAML_MINOR_VERSION=12}
-    : ${OCAML_PATCH_VERSION=1}
-    : ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
-    : ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
-
-    # findlib version we are installing and download URL
-    : ${FINDLIB_MAJOR_VERSION=1}
-    : ${FINDLIB_MINOR_VERSION=2}
-    : ${FINDLIB_PATCH_VERSION=7}
-    : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
-    : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
-
-    if [ "$OCAMLBREW_NAME" != "" ]; then
-        # Install path based on a custom directory name
-        OCAML_BASE="$OCAMLBREW_BASE"/"$OCAMLBREW_NAME"
-    elif [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
-        # Install path based on location in the Subversion tree
-        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-svn/"$OCAMLBREW_SVN_PATH"
-    else
-        # Install path based on release version of OCaml
-        OCAML_BASE="$OCAMLBREW_BASE"/ocaml-"$OCAML_VERSION"
-    fi
-    # Parent directory where software will be built
-    : ${BUILD_DIR="$OCAML_BASE"/build}
-
-    # odb paths
-    : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
-    : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
-
-    # Output will be redirected to this file
-    : ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
-}
-
-#
 # Print a friendly closing message
 #
 closing_message() {
@@ -375,8 +375,8 @@ trap "handle_error" ERR
 ###################################
 
 # Preparation
-init_variables
 parse_opts "$@"
+init_variables
 greet
 setup_build_dir >> "$OCAMLBREW_LOGFILE" 2>&1
 
