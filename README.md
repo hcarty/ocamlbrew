@@ -82,6 +82,10 @@ startup, the [OCaml][] toolchain, [ocamlfind][findlib], [odb.ml][odb],
 [oasis][], [utop][], and [ocamlscript][] will be available from the shell
 environment.
 
+### License
+
+ocamlbrew is distributed under the MIT license.  See LICENSE for details.
+
 [OCaml]: http://caml.inria.fr/ocaml/release.en.html
 [findlib]: http://projects.camlcity.org/projects/findlib.html
 [odb]: https://github.com/thelema/odb
