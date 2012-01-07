@@ -13,6 +13,7 @@ function help_then_exit() {
     echo
     echo "Possible flags:"
     echo "-h         Display this message"
+    echo "-b [path]  Use [path] as \$OCAMLBREW_BASE"
     echo "-a         Install everything with no prompts"
     echo "-o         Install OCaml only, no prompts"
     echo "-f         Install OCaml and findlib only, no prompts"
@@ -20,6 +21,7 @@ function help_then_exit() {
     echo "-t         Install OCaml from Subversion trunk"
     echo "-n [name]  Install under \$OCAMLBREW_BASE/[name]"
     echo
+    echo "The build and installation will occur under \$OCAMLBREW_BASE"
     echo "Subversion path should be relative to $OCAML_SVN_ROOT"
     exit 1
 }
@@ -118,10 +120,13 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "haofs:tn:" OPTION; do
+    while getopts "hb:aofs:tn:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
+            b)
+                OCAMLBREW_BASE="$OPTARG"
+                ;;
             a)
                 INSTALL_ALL="true"
                 ;;
