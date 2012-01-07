@@ -33,15 +33,16 @@ Or it can be run by hand:
     bash ocamlbrew
 
 You will be provided with several prompts asking which software to install.
-[OCaml][] is always installed, with [findlib][], [oasis][], [Batteries][] and
-[utop][] optionally included as well.  If they are requested, [oasis][],
-[Batteries][], and [utop][] are all installed using [oasis-db][] via [odb][].
+[OCaml][] is always installed, with [findlib][], [oasis][], [Batteries][],
+[utop][], and [ocamlscript][] optionally included as well.  If they are
+requested, [oasis][], [Batteries][], [utop][], and [ocamlscript][] are all
+installed using [oasis-db][] via [odb][].
 
 ocamlbrew will print the name of the log file where compilation output is being
 directed.  This can be used for troubleshooting in case one of the build steps
 fails.
 
-#### Configuration options
+#### Configurable environment variables
 
 ocamlbrew can be configured with several environment variables.
 
@@ -53,19 +54,33 @@ ocamlbrew can be configured with several environment variables.
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `/tmp`.
 * `$OCAMLBREW_FLAGS`  
-  This is only for the download-less installation.  Specify which flags to pass
-  to `ocamlbrew`.  `$OCAMLBREW_FLAGS` defaults to `-a`.
+  This is only for download-less installations.  Specify which flags to pass to
+  `ocamlbrew`.  `$OCAMLBREW_FLAGS` defaults to `-a`.
 
 Some command line arguments are available.  See `ocamlbrew -h` for more
 information.
 
+#### Command line flags
+    -h         Display this message
+    -b [path]  Use [path] as $OCAMLBREW_BASE
+    -a         Install everything with no prompts
+    -o         Install OCaml only, no prompts
+    -f         Install OCaml and findlib only, no prompts
+    -s [path]  Install OCaml from Subversion [path]
+    -t         Install OCaml from Subversion trunk
+    -n [name]  Install under $OCAMLBREW_BASE/[name]
+
+The build and installation will occur under `$OCAMLBREW_BASE`  
+Subversion path should be relative to `http://caml.inria.fr/svn/ocaml/`
+
 #### After installation
 
 ocamlbrew will provide instructions on how to setup the newly installed OCaml
-environment once all build and installation steps are complete.  After following
-those instructions, depending on the options selected at ocamlbrew startup, the
-[OCaml][] toolchain, [ocamlfind][findlib], [odb.ml][odb], [oasis][], and
-[utop][] will be available from the shell environment.
+environment once all build and installation steps are complete.  After
+following those instructions, depending on the options selected at ocamlbrew
+startup, the [OCaml][] toolchain, [ocamlfind][findlib], [odb.ml][odb],
+[oasis][], [utop][], and [ocamlscript][] will be available from the shell
+environment.
 
 [OCaml]: http://caml.inria.fr/ocaml/release.en.html
 [findlib]: http://projects.camlcity.org/projects/findlib.html
@@ -76,5 +91,6 @@ those instructions, depending on the options selected at ocamlbrew startup, the
 [React]: http://erratique.ch/software/react
 [Lwt]: http://ocsigen.org/lwt/
 [utop]: http://forge.ocamlcore.org/projects/utop/
+[ocamlscript]: http://martin.jambon.free.fr/ocamlscript.html
 [perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
 [PCRE]: http://www.pcre.org/
