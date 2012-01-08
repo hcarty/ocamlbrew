@@ -113,7 +113,7 @@ function init_variables() {
     : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
 
     # Output will be redirected to this file
-    : ${OCAMLBREW_LOGFILE=`tempfile -d /tmp -p ocamlbrew -s .log`}
+    : ${OCAMLBREW_LOGFILE=`mktemp --tmpdir ocamlbrew.XXXXXX.log`}
 }
 
 #

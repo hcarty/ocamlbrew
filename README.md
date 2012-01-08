@@ -52,7 +52,7 @@ ocamlbrew can be configured with several environment variables.
   `$OCAMLBREW_BASE` defaults to `$HOME/ocamlbrew`.
 * `$OCAMLBREW_LOGFILE`  
   Output from the build process will be directed to this file.  This defaults
-  to a randomly named file under `/tmp`.
+  to a randomly named file under `$TMPDIR` if defined or `/tmp` otherwise.
 * `$OCAMLBREW_FLAGS`  
   This is only for download-less installations.  Specify which flags to pass to
   `ocamlbrew`.  `$OCAMLBREW_FLAGS` defaults to `-a`.
