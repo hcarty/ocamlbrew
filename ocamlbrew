@@ -12,14 +12,15 @@ function help_then_exit() {
     echo Usage: "$0" [flags]
     echo
     echo "Possible flags:"
-    echo "-h         Display this message"
-    echo "-b [path]  Use [path] as \$OCAMLBREW_BASE"
-    echo "-a         Install everything with no prompts"
-    echo "-o         Install OCaml only, no prompts"
-    echo "-f         Install OCaml and findlib only, no prompts"
-    echo "-s [path]  Install OCaml from Subversion [path]"
-    echo "-t         Install OCaml from Subversion trunk"
-    echo "-n [name]  Install under \$OCAMLBREW_BASE/[name]"
+    echo "-h              Display this message"
+    echo "-b [path]       Use [path] as \$OCAMLBREW_BASE"
+    echo "-c \"[flags]\"    Flags to pass to OCaml's configure"
+    echo "-a              Install everything with no prompts"
+    echo "-o              Install OCaml only, no prompts"
+    echo "-f              Install OCaml and findlib only, no prompts"
+    echo "-s [path]       Install OCaml from Subversion [path]"
+    echo "-t              Install OCaml from Subversion trunk"
+    echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
     echo
     echo "The build and installation will occur under \$OCAMLBREW_BASE"
     echo "Subversion path should be relative to $OCAML_SVN_ROOT"
@@ -108,6 +109,9 @@ function init_variables() {
     # Parent directory where software will be built
     : ${BUILD_DIR="$OCAML_BASE"/build}
 
+    # Configuration flags for OCaml
+    : ${OCAML_CONFIG_FLAGS=""}
+
     # odb paths
     : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
     : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
@@ -120,12 +124,15 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:aofs:tn:" OPTION; do
+    while getopts "hb:c:aofs:tn:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
             b)
                 OCAMLBREW_BASE="$OPTARG"
+                ;;
+            c)
+                OCAML_CONFIG_FLAGS="$OPTARG"
                 ;;
             a)
                 INSTALL_ALL="true"
@@ -290,7 +297,7 @@ function brew_ocaml() {
             ;;
         build)
             say Building OCaml
-            ./configure -prefix "$OCAML_BASE"
+            ./configure -prefix "$OCAML_BASE" $OCAML_CONFIG_FLAGS
             make world.opt
             ;;
         install)
