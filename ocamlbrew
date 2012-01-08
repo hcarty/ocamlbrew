@@ -132,7 +132,7 @@ function parse_opts() {
                 OCAMLBREW_BASE="$OPTARG"
                 ;;
             c)
-                OCAML_CONFIG_FLAGS="$OPTARG"
+                OCAML_CONFIG_FLAGS="$(tr [=] [\ ] <<< "$OPTARG")"
                 ;;
             a)
                 INSTALL_ALL="true"
