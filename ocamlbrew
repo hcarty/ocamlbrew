@@ -165,6 +165,8 @@ function greet() {
     fi
     say Software will be built and installed under "$OCAML_BASE"
     say Output will be written to "$OCAMLBREW_LOGFILE"
+    say You can \"tail -f "$OCAMLBREW_LOGFILE"\" in another terminal to track
+    say the build process.
     say
 
     SHOW_CONTINUE_PROMPT="true"
