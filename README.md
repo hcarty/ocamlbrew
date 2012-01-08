@@ -16,30 +16,16 @@ state.
 
 #### Getting started
 
-Using ocamlbrew is very easy.  It can be run in a completely automated fashion:
+Using ocamlbrew is very easy.  In its most basic form, ocamlbrew can run in a
+completely automated fashion:
 
-    # Set one or more of $OCAMLBREW_BASE, $OCAMLBREW_LOGFILE, and
-    # $OCAMLBREW_FLAGS first to customize
-    # This is equivalent to running "ocamlbrew -a" otherwise
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
-Or it can be run by hand:
-
-    # Download...
-    cd /tmp
-    curl -O https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew
-    # ... and run, optionally configuring the environment first
-    bash ocamlbrew
-
-You will be provided with several prompts asking which software to install.
-[OCaml][] is always installed, with [findlib][], [oasis][], [Batteries][],
-[utop][], and [ocamlscript][] optionally included as well.  If they are
-requested, [oasis][], [Batteries][], [utop][], and [ocamlscript][] are all
-installed using [oasis-db][] via [odb][].
+See `RECIPES.md` for more installation options.
 
 ocamlbrew will print the name of the log file where compilation output is being
-directed.  This can be used for troubleshooting in case one of the build steps
-fails.
+directed.  This can be watched to track build progress and/or used for
+troubleshooting in case one of the build steps fails.
 
 #### Configurable environment variables
 
@@ -53,13 +39,11 @@ ocamlbrew can be configured with several environment variables.
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `$TMPDIR` if defined or `/tmp` otherwise.
 * `$OCAMLBREW_FLAGS`  
-  This is only for download-less installations.  Specify which flags to pass to
-  `ocamlbrew`.  `$OCAMLBREW_FLAGS` defaults to `-a`.
+  This is only for installations which do not involve downloading ocamlbrew
+  locally.  This variable specifies which flags to pass to `ocamlbrew`.
+  `$OCAMLBREW_FLAGS` defaults to `-a`.
 
-Some command line arguments are available.  See `ocamlbrew -h` for more
-information.
-
-#### Command line flags
+#### Available command line flags
     -h         Display this message
     -b [path]  Use [path] as $OCAMLBREW_BASE
     -a         Install everything with no prompts
