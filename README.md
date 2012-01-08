@@ -7,7 +7,6 @@ state.
 
 ### Requirements
 
-* Linux
 * bash
 * OCaml's build requirements
 * Any non-OCaml dependencies required by other software selected for
