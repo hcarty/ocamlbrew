@@ -15,6 +15,7 @@ function help_then_exit() {
     echo "-h              Display this message"
     echo "-b [path]       Use [path] as \$OCAMLBREW_BASE"
     echo "-c \"[flags]\"    Flags to pass to OCaml's configure"
+    echo "-p [patch]      Patch to apply to OCaml"
     echo "-a              Install everything with no prompts"
     echo "-o              Install OCaml only, no prompts"
     echo "-f              Install OCaml and findlib only, no prompts"
@@ -23,7 +24,11 @@ function help_then_exit() {
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
     echo
     echo "The build and installation will occur under \$OCAMLBREW_BASE"
+    echo
     echo "Subversion path should be relative to $OCAML_SVN_ROOT"
+    echo
+    echo "OCaml patches can be absolute paths on the file system, or relative"
+    echo "to the OCaml source root"
     exit 1
 }
 
@@ -120,7 +125,7 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:c:aofs:tn:" OPTION; do
+    while getopts "hb:c:p:aofs:tn:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
@@ -129,6 +134,9 @@ function parse_opts() {
                 ;;
             c)
                 OCAML_CONFIG_FLAGS="$(tr [=] [\ ] <<< "$OPTARG")"
+                ;;
+            p)
+                OCAML_PATCH="$OPTARG"
                 ;;
             a)
                 INSTALL_ALL="true"
@@ -292,6 +300,10 @@ function brew_ocaml() {
             fi
             ;;
         build)
+            if [ -n "$OCAML_PATCH" ]; then
+                say Patching OCaml with "$OCAML_PATCH"
+                patch -p0 < "$OCAML_PATCH"
+            fi
             say Building OCaml
             ./configure -prefix "$OCAML_BASE" $OCAML_CONFIG_FLAGS
             make world.opt
