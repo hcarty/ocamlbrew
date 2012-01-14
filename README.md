@@ -10,7 +10,10 @@ state.
 * bash
 * OCaml's build requirements
 * Any non-OCaml dependencies required by other software selected for
-  installation (for example, [oasis][] depends indirectly on [PCRE][]).
+  installation.
+  * For example, [oasis][] depends indirectly on [PCRE][] and [Lwt][] depends
+    on [libev][].  These dependencies can be filled on Debian and Ubuntu
+    with the `libev-dev` and `libpcre3-dev` packages.
 
 ### Usage:
 
@@ -82,3 +85,4 @@ ocamlbrew is distributed under the MIT license.  See LICENSE for details.
 [ocamlscript]: http://martin.jambon.free.fr/ocamlscript.html
 [perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
 [PCRE]: http://www.pcre.org/
+[libev]: http://software.schmorp.de/pkg/libev.html
