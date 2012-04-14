@@ -112,10 +112,6 @@ function init_variables() {
     # Configuration flags for OCaml
     : ${OCAML_CONFIG_FLAGS=""}
 
-    # odb paths
-    : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
-    : ${ODB_INSTALL_DIR="$OCAML_BASE"/odb}
-
     # Output will be redirected to this file
     : ${OCAMLBREW_LOGFILE=`mktemp -t ocamlbrew.XXXXXXXXXX`}
 }
@@ -355,22 +351,21 @@ function brew_odb() {
             chmod +x odb.ml
             ;;
         configure)
-            cd "$OCAML_BASE"/etc
-            curl -O https://raw.github.com/thelema/odb/master/odb.bashrc
-            set +u
-            export ODB_BUILD_DIR="$ODB_BUILD_DIR"
-            export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
-            source odb.bashrc
-            set -u
-            mkdir -p "$ODB_BUILD_DIR"
-            mkdir -p "$ODB_INSTALL_DIR"
+
+            # The default location for odb builds
+            : ${ODB_BUILD_DIR="$BUILD_DIR"/odb}
 
             # Create a sourceable environment
             {
+            echo export OCAML_BASE="$OCAML_BASE"
             echo export ODB_BUILD_DIR="$ODB_BUILD_DIR"
-            echo export ODB_INSTALL_DIR="$ODB_INSTALL_DIR"
-            echo source "$OCAML_BASE"/etc/odb.bashrc
             } >> "$OCAML_BASE"/etc/ocamlbrew.bashrc
+
+            # Source it!
+            source "$OCAML_BASE"/etc/ocamlbrew.bashrc
+
+            # Create our build directory
+            mkdir -p "$ODB_BUILD_DIR"
             ;;
     esac
 }
