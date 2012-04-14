@@ -92,7 +92,7 @@ function init_variables() {
     # findlib version we are installing and download URL
     : ${FINDLIB_MAJOR_VERSION=1}
     : ${FINDLIB_MINOR_VERSION=2}
-    : ${FINDLIB_PATCH_VERSION=7}
+    : ${FINDLIB_PATCH_VERSION=8}
     : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
     : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
 
