@@ -2,8 +2,7 @@
 
 ocamlbrew aims to be a simple tool for getting up and running with various
 versions of [OCaml][].  The concept, along with some basic code, is borrowed
-from [perlbrew][].  This script should be considered to be in an early alpha
-state.
+from [perlbrew][].
 
 ### Requirements
 
