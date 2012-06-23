@@ -101,6 +101,8 @@ function init_variables() {
     : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
     : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
 
+    OCAML_PATCH=""
+
     if [ "$OCAMLBREW_NAME" != "" ]; then
         # Install path based on a custom directory name
         OCAML_BASE="$OCAMLBREW_BASE"/"$OCAMLBREW_NAME"
