@@ -313,16 +313,6 @@ function brew_ocaml() {
         install)
             say Installing OCaml
             make install
-            # Install the compiler libraries as well.  They are needed for utop and some
-            # other projects.
-            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/typing
-            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing
-            mkdir -p "$OCAML_BASE"/lib/ocaml/compiler-libs/utils
-            cp typing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/typing/
-            cp parsing/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/parsing/
-            cp utils/*.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/utils/
-            # Add extra copies of some toplevel files which are needed by findlib
-            cp toplevel/topdirs.cmi toplevel/toploop.cmi "$OCAML_BASE"/lib/ocaml/compiler-libs/
             cd ..
             ;;
     esac
