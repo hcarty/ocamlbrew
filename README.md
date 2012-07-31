@@ -10,9 +10,11 @@ from [perlbrew][].
 * OCaml's build requirements
 * Any non-OCaml dependencies required by other software selected for
   installation.
-  * For example, [oasis][] depends indirectly on [PCRE][] and [Lwt][] depends
-    on [libev][].  These dependencies can be filled on Debian and Ubuntu
-    with the `libev-dev` and `libpcre3-dev` packages.
+  * To fetch all depedencies coming from a fresh Ubuntu 12.04 installation:
+    * `sudo apt-get install curl m4 libev-dev`
+      * `curl` is for fetching files
+      * `m4` is required by [findlib][]
+      * `libev-dev` is requried by [Lwt][] as installed by ocamlbrew
 
 ### Usage:
 
