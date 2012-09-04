@@ -363,7 +363,7 @@ function brew_odb() {
         retrieve)
             say Retrieving the latest version of odb.ml
             cd "$OCAML_BASE"/bin
-            curl -O https://raw.github.com/thelema/odb/master/odb.ml
+            curl -kO https://raw.github.com/thelema/odb/master/odb.ml
             chmod +x odb.ml
             ;;
         configure)
