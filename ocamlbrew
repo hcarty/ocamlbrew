@@ -3,7 +3,8 @@
 # Fail if we try to use an undefined value
 set -u
 # Quit on errors
-set -e
+set -o pipefail
+set -o errtrace
 
 #
 # Display usage message then quit
@@ -32,24 +33,31 @@ function help_then_exit() {
     exit 1
 }
 
+function undo_redirect() {
+    exec 2>&4 1>&3
+}
+
+function error_message() {
+    echo Something errored out, please check the log file for details:
+    echo "$OCAMLBREW_LOGFILE"
+    echo Exiting...
+}
+
 #
 # Print a message when quitting due to an error
 #
 function handle_error() {
-    [ -t 3 ] && {
-        echo "Something errored out, please check the log file for details:"
-        echo "$OCAMLBREW_LOGFILE"
-        echo Exiting...
-    } >&3
+    undo_redirect
+    error_message
+    exit 1
 }
 
 #
 # Initialize output redirection
 #
 function init_redirect() {
-    exec 3>&1
-    exec > "$OCAMLBREW_LOGFILE"
-    exec 2>&1
+    exec 3>&1 4>&2
+    exec 1>"$OCAMLBREW_LOGFILE" 2>&1
 }
 
 #
