@@ -22,19 +22,11 @@ Unless otherwise noted, each of the recipes below will install under
     export OCAMLBREW_FLAGS="-t -f"
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
-### Latest OCaml 3.12.x development version, no other tools
+### OCaml 3.12.1 release version, no other tools
 
-    # Equivalent to: ./ocamlbrew -s version/3.12 -o
+    # Equivalent to: ./ocamlbrew -s release/3.12.1 -o
     # Specify an explicit Subversion path to pull from and we want OCaml only
-    export OCAMLBREW_FLAGS="-s version/3.12 -o"
-    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
-
-### OCaml gadts-devel branch, findlib, odb.ml
-
-    # Equivalent to: ./ocamlbrew -s branches/gadt-devel -f
-    # Specify an explicit Subversion path to pull from and we only want OCaml,
-    # findlib, and odb.ml
-    export OCAMLBREW_FLAGS="-s branches/gadt-devel -f"
+    export OCAMLBREW_FLAGS="-s release/3.12.1 -o"
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
 ### Install to a custom brew root
