@@ -19,7 +19,7 @@ function help_then_exit() {
     echo "-p [patch]      Patch to apply to OCaml"
     echo "-a              Install everything with no prompts"
     echo "-o              Install OCaml only, no prompts"
-    echo "-f              Install OCaml and findlib only, no prompts"
+    echo "-f              Install OCaml, findlib and odb.ml only, no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
     echo "-t              Install OCaml from Subversion trunk"
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"

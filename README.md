@@ -51,15 +51,16 @@ ocamlbrew can be configured with several environment variables.
     -h              Display this message
     -b [path]       Use [path] as $OCAMLBREW_BASE
     -c "[flags]"    Flags to pass to OCaml's configure
+    -p [patch]      Patch to apply to OCaml
     -a              Install everything with no prompts
     -o              Install OCaml only, no prompts
-    -f              Install OCaml and findlib only, no prompts
+    -f              Install OCaml, findlib and odb.ml only, no prompts
     -s [path]       Install OCaml from Subversion [path]
     -t              Install OCaml from Subversion trunk
     -n [name]       Install under $OCAMLBREW_BASE/[name]
 
 The build and installation will occur under `$OCAMLBREW_BASE`  
-Subversion path should be relative to `http://caml.inria.fr/svn/ocaml/`
+Subversion paths should be relative to `http://caml.inria.fr/svn/ocaml/`
 
 #### After installation
 
