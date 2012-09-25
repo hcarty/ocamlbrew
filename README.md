@@ -55,6 +55,7 @@ ocamlbrew can be configured with several environment variables.
     -a              Install everything with no prompts
     -o              Install OCaml only, no prompts
     -f              Install OCaml, findlib and odb.ml only, no prompts
+    -x              Install OCaml, findlib, odb.ml, oasis, no prompts
     -s [path]       Install OCaml from Subversion [path]
     -t              Install OCaml from Subversion trunk
     -n [name]       Install under $OCAMLBREW_BASE/[name]

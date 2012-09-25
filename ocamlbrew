@@ -20,6 +20,7 @@ function help_then_exit() {
     echo "-a              Install everything with no prompts"
     echo "-o              Install OCaml only, no prompts"
     echo "-f              Install OCaml, findlib and odb.ml only, no prompts"
+    echo "-x              Install OCaml, findlib, odb.ml, oasis, no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
     echo "-t              Install OCaml from Subversion trunk"
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
@@ -88,6 +89,7 @@ function init_variables() {
     : ${INSTALL_ALL="false"}
     : ${INSTALL_OCAML_ONLY="false"}
     : ${INSTALL_OCAML_FINDLIB_ONLY="false"}
+    : ${INSTALL_OASIS_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
 
     # Set configuration options such as installation and build locations here
@@ -135,7 +137,7 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:c:p:aofs:tn:" OPTION; do
+    while getopts "hb:c:p:aofxs:tn:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
@@ -156,6 +158,9 @@ function parse_opts() {
                 ;;
             f)
                 INSTALL_OCAML_FINDLIB_ONLY="true"
+                ;;
+            x)
+                INSTALL_OASIS_ONLY="true"
                 ;;
             s)
                 OCAMLBREW_INSTALL_SVN="true"
@@ -213,6 +218,11 @@ function greet() {
         SHOW_CONTINUE_PROMPT="false"
         FINDLIB_INSTALL="true"
         ODB_INSTALL="true"
+    elif [ "$INSTALL_OASIS_ONLY" = "true" ]; then
+        SHOW_CONTINUE_PROMPT="false"
+        FINDLIB_INSTALL="true"
+        ODB_INSTALL="true"
+        OASIS_INSTALL="true"
     else
         # Ask the user what components they would like to install
         prompt "Would you like to install findlib? (y/n) "
