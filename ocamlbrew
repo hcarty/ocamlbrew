@@ -15,6 +15,7 @@ function help_then_exit() {
     echo "Possible flags:"
     echo "-h              Display this message"
     echo "-b [path]       Use [path] as \$OCAMLBREW_BASE"
+    echo "-v [version]    Install the given version of OCaml (i.e. 4.00.1)"
     echo "-c \"[flags]\"    Flags to pass to OCaml's configure"
     echo "-p [patch]      Patch to apply to OCaml"
     echo "-a              Install everything with no prompts"
@@ -137,7 +138,7 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:c:p:aofxs:tn:" OPTION; do
+    while getopts "hb:c:p:aofxs:tn:v:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
@@ -171,6 +172,12 @@ function parse_opts() {
                 ;;
             n)
                 OCAMLBREW_NAME="$OPTARG"
+                ;;
+            v)
+                # split version into components using read
+                IFS=. read -r OCAML_MAJOR_VERSION OCAML_MINOR_VERSION OCAML_PATCH_VERSION <<<"$OPTARG"
+                OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION
+                OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz
                 ;;
             ?)
                 help_then_exit ;;
@@ -509,4 +516,3 @@ say Done!
 popd
 
 closing_message
-
