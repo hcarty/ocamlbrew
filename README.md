@@ -54,6 +54,7 @@ ocamlbrew can be configured with several environment variables.
     -p [patch]      Patch to apply to OCaml
     -a              Install everything with no prompts
     -o              Install OCaml only, no prompts
+    -r              Install OCaml and opam only, no prompts
     -f              Install OCaml, findlib and odb.ml only, no prompts
     -x              Install OCaml, findlib, odb.ml, oasis, no prompts
     -s [path]       Install OCaml from Subversion [path]
@@ -65,12 +66,12 @@ Subversion paths should be relative to `http://caml.inria.fr/svn/ocaml/`
 
 #### After installation
 
-ocamlbrew will provide instructions on how to setup the newly installed OCaml
-environment once all build and installation steps are complete.  After
-following those instructions, depending on the options selected at ocamlbrew
-startup, the [OCaml][] toolchain, [ocamlfind][findlib], [odb.ml][odb],
-[oasis][], [utop][], and [ocamlscript][] will be available from the shell
-environment.
+ocamlbrew will provide instructions on how to setup the newly
+installed OCaml environment once all build and installation steps are
+complete.  After following those instructions, depending on the
+options selected at ocamlbrew startup, the [OCaml][] toolchain,
+[ocamlfind][findlib], [odb.ml][odb], [oasis][], [opam][], [utop][],
+and [ocamlscript][] will be available from the shell environment.
 
 ### License
 
@@ -81,6 +82,7 @@ ocamlbrew is distributed under the MIT license.  See LICENSE for details.
 [odb]: https://github.com/thelema/odb
 [oasis]: http://oasis.forge.ocamlcore.org/
 [oasis-db]: http://oasis.ocamlcore.org/dev/home
+[opam]: http://opam.ocamlpro.com/
 [Batteries]: http://batteries.forge.ocamlcore.org/
 [React]: http://erratique.ch/software/react
 [Lwt]: http://ocsigen.org/lwt/
