@@ -20,6 +20,7 @@ function help_then_exit() {
     echo "-p [patch]      Patch to apply to OCaml"
     echo "-a              Install everything with no prompts"
     echo "-o              Install OCaml only, no prompts"
+    echo "-r              Install OCaml and opam only, no prompts"
     echo "-f              Install OCaml, findlib and odb.ml only, no prompts"
     echo "-x              Install OCaml, findlib, odb.ml, oasis, no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
@@ -91,6 +92,7 @@ function init_variables() {
     : ${INSTALL_OCAML_ONLY="false"}
     : ${INSTALL_OCAML_FINDLIB_ONLY="false"}
     : ${INSTALL_OASIS_ONLY="false"}
+    : ${INSTALL_OPAM_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
 
     # Set configuration options such as installation and build locations here
@@ -111,6 +113,13 @@ function init_variables() {
     : ${FINDLIB_PATCH_VERSION=3}
     : ${FINDLIB_VERSION=$FINDLIB_MAJOR_VERSION.$FINDLIB_MINOR_VERSION.$FINDLIB_PATCH_VERSION}
     : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
+
+    # opam version we are installing and download URL
+    : ${OPAM_MAJOR_VERSION=0}
+    : ${OPAM_MINOR_VERSION=9}
+    : ${OPAM_PATCH_VERSION=1}
+    : ${OPAM_VERSION=$OPAM_MAJOR_VERSION.$OPAM_MINOR_VERSION.$OPAM_PATCH_VERSION}
+    : ${OPAM_URL=https://github.com/OCamlPro/opam/archive/$OPAM_VERSION.tar.gz}
 
     OCAML_PATCH=""
 
@@ -138,7 +147,7 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:c:p:aofxs:tn:v:" OPTION; do
+    while getopts "hb:c:p:aorfxs:tn:v:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
@@ -156,6 +165,9 @@ function parse_opts() {
                 ;;
             o)
                 INSTALL_OCAML_ONLY="true"
+                ;;
+            r)
+                INSTALL_OPAM_ONLY="true"
                 ;;
             f)
                 INSTALL_OCAML_FINDLIB_ONLY="true"
@@ -206,6 +218,7 @@ function greet() {
     FINDLIB_INSTALL="false"
     ODB_INSTALL="false"
     OASIS_INSTALL="false"
+    OPAM_INSTALL="false"
     UTOP_INSTALL="false"
     BATTERIES_INSTALL="false"
     OCAMLSCRIPT_INSTALL="false"
@@ -214,6 +227,7 @@ function greet() {
         FINDLIB_INSTALL="true"
         ODB_INSTALL="true"
         OASIS_INSTALL="true"
+        OPAM_INSTALL="true"
         UTOP_INSTALL="true"
         BATTERIES_INSTALL="true"
         OCAMLSCRIPT_INSTALL="true"
@@ -230,6 +244,9 @@ function greet() {
         FINDLIB_INSTALL="true"
         ODB_INSTALL="true"
         OASIS_INSTALL="true"
+    elif [ "$INSTALL_OPAM_ONLY" = "true" ]; then
+        SHOW_CONTINUE_PROMPT="false"
+        OPAM_INSTALL="true"
     else
         # Ask the user what components they would like to install
         prompt "Would you like to install findlib? (y/n) "
@@ -276,6 +293,14 @@ function greet() {
                 OCAMLSCRIPT_INSTALL="false"
             fi
         fi
+
+        prompt "Would you like to install opam? (y/n) "
+        reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
+        if [ "$reply_lower" = "y" ]; then
+            OPAM_INSTALL="true"
+        else
+            OPAM_INSTALL="false"
+        fi
     fi
 
     # Print a summary of what we are going to do, then continue
@@ -284,6 +309,7 @@ function greet() {
     if "$FINDLIB_INSTALL" = "true"; then say and install findlib; fi
     if "$ODB_INSTALL" = "true"; then say and install odb; fi
     if "$OASIS_INSTALL" = "true"; then say and install oasis; fi
+    if "$OPAM_INSTALL" = "true"; then say and install opam; fi
     if "$UTOP_INSTALL" = "true"; then say and install utop; fi
     if "$BATTERIES_INSTALL" = "true"; then say and install Batteries; fi
     if "$OCAMLSCRIPT_INSTALL" = "true"; then say and install ocamlscript; fi
@@ -412,6 +438,39 @@ function brew_odb() {
 }
 
 #
+# Handle opam brewing
+#
+function brew_opam() {
+    case $1 in
+        retrieve)
+            say Retrieving the latest version of opam
+            curl -LO $OPAM_URL
+            tar xzf $OPAM_VERSION.tar.gz
+            cd opam-$OPAM_VERSION
+            ;;
+        configure)
+            say Configuring opam
+            ./configure --prefix="$OCAML_BASE"
+            ;;
+        build)
+            say Building opam
+            make
+            make install
+            {
+            echo export OPAMROOT="$OCAML_BASE/.opam"
+            echo 'eval `opam config env`'
+            } >> "$OCAML_BASE"/etc/ocamlbrew.bashrc
+
+            # Source it!
+            source "$OCAML_BASE"/etc/ocamlbrew.bashrc
+
+            # Initialize opam
+            opam init
+            ;;
+    esac
+}
+
+#
 # Install packages with odb, potentially with some extra setup
 #
 function install_with_odb() {
@@ -493,6 +552,13 @@ fi
 # oasis
 if [ "$OASIS_INSTALL" = "true" ]; then
     install_with_odb "oasis"
+fi
+
+# opam
+if [ "$OPAM_INSTALL" = "true" ]; then
+    brew_opam "retrieve"
+    brew_opam "configure"
+    brew_opam "build"
 fi
 
 # utop
