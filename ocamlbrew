@@ -461,11 +461,8 @@ function brew_opam() {
             echo 'eval `opam config env`'
             } >> "$OCAML_BASE"/etc/ocamlbrew.bashrc
 
-            # Source it!
-            source "$OCAML_BASE"/etc/ocamlbrew.bashrc
-
             # Initialize opam
-            opam init
+            OPAMROOT="$OCAML_BASE/.opam" opam init
             ;;
     esac
 }
