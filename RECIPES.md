@@ -54,17 +54,19 @@ install each available package.
     # ... and run, optionally configuring the environment first
     bash ocamlbrew
 
-You will be provided with several prompts asking which software to install.
-[OCaml][] is always installed, with [findlib][], [oasis][], [Batteries][],
-[utop][], and [ocamlscript][] optionally included as well.  If they are
-requested, [oasis][], [Batteries][], [utop][], and [ocamlscript][] are all
-installed using [oasis-db][] via [odb][].
+You will be provided with several prompts asking which software to
+install.  [OCaml][] is always installed, with [findlib][], [oasis][],
+[opam][], [Batteries][], [utop][], and [ocamlscript][] optionally
+included as well.  If they are requested, [oasis][], [Batteries][],
+[utop][], and [ocamlscript][] are all installed using [oasis-db][] via
+[odb][].
 
 [OCaml]: http://caml.inria.fr/ocaml/release.en.html
 [findlib]: http://projects.camlcity.org/projects/findlib.html
 [odb]: https://github.com/thelema/odb
 [oasis]: http://oasis.forge.ocamlcore.org/
 [oasis-db]: http://oasis.ocamlcore.org/dev/home
+[opam]: http://opam.ocamlpro.com/
 [Batteries]: http://batteries.forge.ocamlcore.org/
 [React]: http://erratique.ch/software/react
 [Lwt]: http://ocsigen.org/lwt/
