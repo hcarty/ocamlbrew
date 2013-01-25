@@ -19,29 +19,25 @@ Unless otherwise noted, each of the recipes below will install under
     # Equivalent to: ./ocamlbrew -t -f
     # Specify that we want to pull from Subversion trunk and we only want
     # OCaml, findlib, and odb.ml
-    export OCAMLBREW_FLAGS="-t -f"
-    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
+    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_FLAGS="-t -f" bash
 
 ### OCaml 3.12.1 release version, no other tools
 
     # Equivalent to: ./ocamlbrew -s release/3.12.1 -o
     # Specify an explicit Subversion path to pull from and we want OCaml only
-    export OCAMLBREW_FLAGS="-s release/3.12.1 -o"
-    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
+    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_FLAGS="-s release/3.12.1 -o" bash
 
 ### Install to a custom brew root
 
     # Build and install under /opt/ocamlbrew
-    export OCAMLBREW_BASE=/opt/ocamlbrew
     # Equivalent to: ./ocamlbrew -a
-    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
+    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_BASE="/opt/ocamlbrew" bash
 
 ### Install OCaml trunk to a full customized directory
 
     # Build and install under /opt/ocamlbrew/
     # Equivalent to: ./ocamlbrew -t -f -b /opt/ocamlbrew -n trunk
-    export OCAMLBREW_FLAGS="-t -f -b /opt/ocamlbrew -n trunk"
-    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
+    curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_FLAGS="-t -f -b /opt/ocamlbrew -n trunk" bash
 
 ### Download ocamlbrew and run it locally
 
