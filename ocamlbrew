@@ -115,11 +115,11 @@ function init_variables() {
     : ${FINDLIB_URL=http://download.camlcity.org/download/findlib-$FINDLIB_VERSION.tar.gz}
 
     # opam version we are installing and download URL
-    : ${OPAM_MAJOR_VERSION=0}
-    : ${OPAM_MINOR_VERSION=9}
-    : ${OPAM_PATCH_VERSION=1}
+    : ${OPAM_MAJOR_VERSION=1}
+    : ${OPAM_MINOR_VERSION=0}
+    : ${OPAM_PATCH_VERSION=0}
     : ${OPAM_VERSION=$OPAM_MAJOR_VERSION.$OPAM_MINOR_VERSION.$OPAM_PATCH_VERSION}
-    : ${OPAM_URL=https://github.com/OCamlPro/opam/archive/$OPAM_VERSION.tar.gz}
+    : ${OPAM_URL=http://www.ocamlpro.com/pub/opam-full-$OPAM_VERSION.tar.gz}
 
     OCAML_PATCH=""
 
@@ -138,6 +138,9 @@ function init_variables() {
 
     # Configuration flags for OCaml
     : ${OCAML_CONFIG_FLAGS=""}
+
+    # Configuration flags for opam
+    : ${OPAM_FLAGS="--no-setup"}
 
     # Output will be redirected to this file
     : ${OCAMLBREW_LOGFILE=`mktemp -t ocamlbrew.XXXXXXXXXX`}
@@ -445,8 +448,8 @@ function brew_opam() {
         retrieve)
             say Retrieving the latest version of opam
             curl -LO $OPAM_URL
-            tar xzf $OPAM_VERSION.tar.gz
-            cd opam-$OPAM_VERSION
+            tar xzf opam-full-$OPAM_VERSION.tar.gz
+            cd opam-full-$OPAM_VERSION
             ;;
         configure)
             say Configuring opam
@@ -462,7 +465,7 @@ function brew_opam() {
             } >> "$OCAML_BASE"/etc/ocamlbrew.bashrc
 
             # Initialize opam
-            OPAMROOT="$OCAML_BASE/.opam" opam init
+            OPAMROOT="$OCAML_BASE/.opam" opam init "$OPAM_FLAGS"
             ;;
     esac
 }
