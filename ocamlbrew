@@ -95,6 +95,9 @@ function init_variables() {
     : ${INSTALL_OPAM_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
 
+    # Specify the 'make' executable to use
+    : ${OCAMLBREW_MAKE="make"}
+
     # Set configuration options such as installation and build locations here
 
     # OCaml from Subversion
@@ -357,11 +360,11 @@ function brew_ocaml() {
             fi
             say Building OCaml
             ./configure -prefix "$OCAML_BASE" $OCAML_CONFIG_FLAGS
-            make world.opt
+            "$OCAMLBREW_MAKE" world.opt
             ;;
         install)
             say Installing OCaml
-            make install
+            "$OCAMLBREW_MAKE" install
             # Install the compiler libraries as well.  They are needed for utop and some
             # other projects.
             if [ "$OCAML_MAJOR_VERSION" = "3" ]; then
@@ -391,11 +394,11 @@ function brew_findlib() {
             tar xzf findlib-$FINDLIB_VERSION.tar.gz
             cd findlib-$FINDLIB_VERSION
             ./configure
-            make all opt
+            "$OCAMLBREW_MAKE" all opt
             ;;
         install)
             say Installing and configuring findlib
-            make install
+            "$OCAMLBREW_MAKE" install
             # Extra configuration for OCaml libraries with C stubs, as recommended by the
             # findlib documentation.
             mkdir `ocamlfind printconf destdir`/stublibs
@@ -415,14 +418,14 @@ function brew_opam() {
             tar xzf opam-full-$OPAM_VERSION.tar.gz
             cd opam-full-$OPAM_VERSION
             ;;
-        configure)
-            say Configuring opam
-            ./configure --prefix="$OCAML_BASE"
-            ;;
         build)
             say Building opam
-            make
-            make install
+            ./configure --prefix="$OCAML_BASE"
+            "$OCAMLBREW_MAKE"
+            ;;
+        install)
+            say Installing opam
+            "$OCAMLBREW_MAKE" install
             {
             echo export OPAMROOT="$OCAMLBREW_OPAMROOT"
             echo 'eval `opam config env`'
@@ -498,8 +501,8 @@ fi
 # opam
 if [ "$OPAM_INSTALL" = "true" ]; then
     brew_opam "retrieve"
-    brew_opam "configure"
     brew_opam "build"
+    brew_opam "install"
 fi
 
 # oasis
