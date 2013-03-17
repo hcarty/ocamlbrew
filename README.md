@@ -11,10 +11,9 @@ from [perlbrew][].
 * Any non-OCaml dependencies required by other software selected for
   installation.
   * To fetch all depedencies coming from a fresh Ubuntu 12.04 installation:
-    * `sudo apt-get install curl m4 libev-dev`
+    * `sudo apt-get install curl m4`
       * `curl` is for fetching files
       * `m4` is required by [findlib][]
-      * `libev-dev` is requried by [Lwt][] as installed by ocamlbrew
 
 ### Usage:
 
@@ -35,14 +34,14 @@ troubleshooting in case one of the build steps fails.
 
 ocamlbrew can be configured with several environment variables.
 
-* `$OCAMLBREW_BASE`  
+* `$OCAMLBREW_BASE`
   The most important is `$OCAMLBREW_BASE` which defines the directory under
   which all software built and installed by ocamlbrew will reside.
   `$OCAMLBREW_BASE` defaults to `$HOME/ocamlbrew`.
-* `$OCAMLBREW_LOGFILE`  
+* `$OCAMLBREW_LOGFILE`
   Output from the build process will be directed to this file.  This defaults
   to a randomly named file under `$TMPDIR` if defined or `/tmp` otherwise.
-* `$OCAMLBREW_FLAGS`  
+* `$OCAMLBREW_FLAGS`
   This is only for installations which do not involve downloading ocamlbrew
   locally.  This variable specifies which flags to pass to `ocamlbrew`.
   `$OCAMLBREW_FLAGS` defaults to `-a`.
@@ -50,13 +49,14 @@ ocamlbrew can be configured with several environment variables.
 #### Available command line flags
     -h              Display this message
     -b [path]       Use [path] as $OCAMLBREW_BASE
+    -v [version]    Install the given version of OCaml (i.e. 4.00.1)
     -c "[flags]"    Flags to pass to OCaml's configure
     -p [patch]      Patch to apply to OCaml
     -a              Install everything with no prompts
-    -o              Install OCaml only, no prompts
-    -r              Install OCaml and opam only, no prompts
-    -f              Install OCaml, findlib and odb.ml only, no prompts
-    -x              Install OCaml, findlib, odb.ml, oasis, no prompts
+    -o              Install OCaml, no prompts
+    -f              Install OCaml and findlib, no prompts
+    -r              Install OCaml and opam, no prompts
+    -x              Install OCaml, opam, oasis (via opam), no prompts
     -s [path]       Install OCaml from Subversion [path]
     -t              Install OCaml from Subversion trunk
     -n [name]       Install under $OCAMLBREW_BASE/[name]
@@ -70,8 +70,8 @@ ocamlbrew will provide instructions on how to setup the newly
 installed OCaml environment once all build and installation steps are
 complete.  After following those instructions, depending on the
 options selected at ocamlbrew startup, the [OCaml][] toolchain,
-[ocamlfind][findlib], [odb.ml][odb], [oasis][], [opam][], [utop][],
-and [ocamlscript][] will be available from the shell environment.
+[ocamlfind][findlib], [opam][], [oasis][], [utop][], and
+[ocamlscript][] will be available from the shell environment.
 
 ### License
 
@@ -79,9 +79,7 @@ ocamlbrew is distributed under the MIT license.  See LICENSE for details.
 
 [OCaml]: http://caml.inria.fr/ocaml/release.en.html
 [findlib]: http://projects.camlcity.org/projects/findlib.html
-[odb]: https://github.com/thelema/odb
 [oasis]: http://oasis.forge.ocamlcore.org/
-[oasis-db]: http://oasis.ocamlcore.org/dev/home
 [opam]: http://opam.ocamlpro.com/
 [Batteries]: http://batteries.forge.ocamlcore.org/
 [React]: http://erratique.ch/software/react
@@ -89,5 +87,3 @@ ocamlbrew is distributed under the MIT license.  See LICENSE for details.
 [utop]: http://forge.ocamlcore.org/projects/utop/
 [ocamlscript]: http://martin.jambon.free.fr/ocamlscript.html
 [perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
-[PCRE]: http://www.pcre.org/
-[libev]: http://software.schmorp.de/pkg/libev.html

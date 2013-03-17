@@ -14,11 +14,11 @@ Unless otherwise noted, each of the recipes below will install under
     # necessary to specify $OCAMLBREW_FLAGS.
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | bash
 
-### Latest OCaml trunk, findlib, odb.ml
+### Latest OCaml trunk, findlib (directly from source)
 
     # Equivalent to: ./ocamlbrew -t -f
     # Specify that we want to pull from Subversion trunk and we only want
-    # OCaml, findlib, and odb.ml
+    # OCaml and findlib
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_FLAGS="-t -f" bash
 
 ### OCaml 3.12.1 release version, no other tools
@@ -33,7 +33,7 @@ Unless otherwise noted, each of the recipes below will install under
     # Equivalent to: ./ocamlbrew -a
     curl -kL https://raw.github.com/hcarty/ocamlbrew/master/ocamlbrew-install | env OCAMLBREW_BASE="/opt/ocamlbrew" bash
 
-### Install OCaml trunk to a full customized directory
+### Install OCaml trunk and findlib to a custom directory
 
     # Build and install under /opt/ocamlbrew/
     # Equivalent to: ./ocamlbrew -t -f -b /opt/ocamlbrew -n trunk
@@ -54,19 +54,12 @@ You will be provided with several prompts asking which software to
 install.  [OCaml][] is always installed, with [findlib][], [oasis][],
 [opam][], [Batteries][], [utop][], and [ocamlscript][] optionally
 included as well.  If they are requested, [oasis][], [Batteries][],
-[utop][], and [ocamlscript][] are all installed using [oasis-db][] via
-[odb][].
+[utop][], and [ocamlscript][] are all installed using [opam][].
 
 [OCaml]: http://caml.inria.fr/ocaml/release.en.html
 [findlib]: http://projects.camlcity.org/projects/findlib.html
-[odb]: https://github.com/thelema/odb
 [oasis]: http://oasis.forge.ocamlcore.org/
-[oasis-db]: http://oasis.ocamlcore.org/dev/home
 [opam]: http://opam.ocamlpro.com/
 [Batteries]: http://batteries.forge.ocamlcore.org/
-[React]: http://erratique.ch/software/react
-[Lwt]: http://ocsigen.org/lwt/
 [utop]: http://forge.ocamlcore.org/projects/utop/
 [ocamlscript]: http://martin.jambon.free.fr/ocamlscript.html
-[perlbrew]: http://search.cpan.org/~gugod/App-perlbrew/bin/perlbrew
-[PCRE]: http://www.pcre.org/
