@@ -255,13 +255,10 @@ function greet() {
         FINDLIB_INSTALL="true"
     else
         # Ask the user what components they would like to install
-        prompt "Would you like to install findlib without opam? (y/n) "
+        prompt "Would you like to install findlib? (y/n) "
         reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
         if [ "$reply_lower" = "y" ]; then
             FINDLIB_INSTALL="true"
-            OPAM_INSTALL="false"
-        else
-            FINDLIB_INSTALL="false"
 
             prompt "Would you like to install opam? (y/n) "
             reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
@@ -299,11 +296,13 @@ function greet() {
                 else
                     OCAMLSCRIPT_INSTALL="false"
                 fi
+
             else
                 OPAM_INSTALL="false"
             fi
+        else
+            FINDLIB_INSTALL="false"
         fi
-
     fi
 
     # Print a summary of what we are going to do, then continue
