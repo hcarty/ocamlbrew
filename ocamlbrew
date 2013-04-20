@@ -92,7 +92,7 @@ function init_variables() {
     : ${INSTALL_OCAML_ONLY="false"}
     : ${INSTALL_OCAML_FINDLIB_ONLY="false"}
     : ${INSTALL_OASIS_ONLY="false"}
-    : ${INSTALL_OPAM_ONLY="false"}
+    : ${INSTALL_OPAM_FINDLIB_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
 
     # Specify the 'make' executable to use
