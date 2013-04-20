@@ -22,7 +22,7 @@ function help_then_exit() {
     echo "-o              Install OCaml, no prompts"
     echo "-f              Install OCaml and findlib, no prompts"
     echo "-r              Install OCaml, findlib, and opam, no prompts"
-    echo "-x              Install OCaml, opam, oasis (via opam), no prompts"
+    echo "-x              Install OCaml, findlib, opam, oasis (via opam), no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
     echo "-t              Install OCaml from Subversion trunk"
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
