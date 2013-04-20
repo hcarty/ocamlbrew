@@ -21,8 +21,8 @@ function help_then_exit() {
     echo "-a              Install everything with no prompts"
     echo "-o              Install OCaml, no prompts"
     echo "-f              Install OCaml and findlib, no prompts"
-    echo "-r              Install OCaml and opam, no prompts"
-    echo "-x              Install OCaml, opam, oasis (via opam), no prompts"
+    echo "-r              Install OCaml, findlib, and opam, no prompts"
+    echo "-x              Install OCaml, findlib, opam, and oasis (via opam), no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
     echo "-t              Install OCaml from Subversion trunk"
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
@@ -92,7 +92,7 @@ function init_variables() {
     : ${INSTALL_OCAML_ONLY="false"}
     : ${INSTALL_OCAML_FINDLIB_ONLY="false"}
     : ${INSTALL_OASIS_ONLY="false"}
-    : ${INSTALL_OPAM_ONLY="false"}
+    : ${INSTALL_OPAM_FINDLIB_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
 
     # Specify the 'make' executable to use
@@ -176,7 +176,7 @@ function parse_opts() {
                 INSTALL_OCAML_ONLY="true"
                 ;;
             r)
-                INSTALL_OPAM_ONLY="true"
+                INSTALL_OPAM_FINDLIB_ONLY="true"
                 ;;
             f)
                 INSTALL_OCAML_FINDLIB_ONLY="true"
@@ -249,18 +249,16 @@ function greet() {
         OPAM_INSTALL="true"
         FINDLIB_INSTALL="true"
         OASIS_INSTALL="true"
-    elif [ "$INSTALL_OPAM_ONLY" = "true" ]; then
+    elif [ "$INSTALL_OPAM_FINDLIB_ONLY" = "true" ]; then
         SHOW_CONTINUE_PROMPT="false"
         OPAM_INSTALL="true"
+        FINDLIB_INSTALL="true"
     else
         # Ask the user what components they would like to install
-        prompt "Would you like to install findlib without opam? (y/n) "
+        prompt "Would you like to install findlib? (y/n) "
         reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
         if [ "$reply_lower" = "y" ]; then
             FINDLIB_INSTALL="true"
-            OPAM_INSTALL="false"
-        else
-            FINDLIB_INSTALL="false"
 
             prompt "Would you like to install opam? (y/n) "
             reply_lower="$(tr [A-Z] [a-z] <<< "$REPLY")"
@@ -298,11 +296,13 @@ function greet() {
                 else
                     OCAMLSCRIPT_INSTALL="false"
                 fi
+
             else
                 OPAM_INSTALL="false"
             fi
+        else
+            FINDLIB_INSTALL="false"
         fi
-
     fi
 
     # Print a summary of what we are going to do, then continue
