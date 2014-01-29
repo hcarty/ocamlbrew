@@ -120,7 +120,7 @@ function init_variables() {
     # opam version we are installing and download URL
     : ${OPAM_MAJOR_VERSION=1}
     : ${OPAM_MINOR_VERSION=1}
-    : ${OPAM_PATCH_VERSION=0}
+    : ${OPAM_PATCH_VERSION=1}
     : ${OPAM_VERSION=$OPAM_MAJOR_VERSION.$OPAM_MINOR_VERSION.$OPAM_PATCH_VERSION}
     : ${OPAM_URL=http://www.ocamlpro.com/pub/opam-full-$OPAM_VERSION.tar.gz}
 
