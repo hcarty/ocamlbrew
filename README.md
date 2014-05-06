@@ -14,7 +14,7 @@ from [perlbrew][].
     * `sudo apt-get install curl m4`
       * `curl` is for fetching files
       * `m4` is required by [findlib][]
-  * BSD systems may require GNU make.  Use the `$OCAMLBREW_ROOT` environment
+  * BSD systems may require GNU make.  Use the `$OCAMLBREW_MAKE` environment
     variable to specify the correct `make` or `gmake` executable to use.
 
 ### Usage:
