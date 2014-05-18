@@ -124,7 +124,8 @@ function init_variables() {
     : ${OPAM_VERSION=$OPAM_MAJOR_VERSION.$OPAM_MINOR_VERSION.$OPAM_PATCH_VERSION}
     : ${OPAM_URL=http://www.ocamlpro.com/pub/opam-full-$OPAM_VERSION.tar.gz}
 
-    OCAML_PATCH=""
+    # Patch to apply to the OCaml source tree
+    : ${OCAML_PATCH=""}
 
     if [ "$OCAMLBREW_NAME" != "" ]; then
         # Install path based on a custom directory name
