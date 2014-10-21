@@ -105,8 +105,8 @@ function init_variables() {
 
     # The version of OCaml we are installing and download URL
     : ${OCAML_MAJOR_VERSION=4}
-    : ${OCAML_MINOR_VERSION=02}
-    : ${OCAML_PATCH_VERSION=1}
+    : ${OCAML_MINOR_VERSION=01}
+    : ${OCAML_PATCH_VERSION=0}
     : ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
     : ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
 
