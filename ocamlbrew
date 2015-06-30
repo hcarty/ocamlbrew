@@ -15,7 +15,7 @@ function help_then_exit() {
     echo "Possible flags:"
     echo "-h              Display this message"
     echo "-b [path]       Use [path] as \$OCAMLBREW_BASE"
-    echo "-v [version]    Install the given version of OCaml (i.e. 4.02.1)"
+    echo "-v [version]    Install the given version of OCaml (i.e. 4.02.2)"
     echo "-c \"[flags]\"    Flags to pass to OCaml's configure"
     echo "-p [patch]      Patch to apply to OCaml"
     echo "-a              Install everything with no prompts"
@@ -106,7 +106,7 @@ function init_variables() {
     # The version of OCaml we are installing and download URL
     : ${OCAML_MAJOR_VERSION=4}
     : ${OCAML_MINOR_VERSION=02}
-    : ${OCAML_PATCH_VERSION=1}
+    : ${OCAML_PATCH_VERSION=2}
     : ${OCAML_VERSION=$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION.$OCAML_PATCH_VERSION}
     : ${OCAML_URL=http://caml.inria.fr/pub/distrib/ocaml-$OCAML_MAJOR_VERSION.$OCAML_MINOR_VERSION/ocaml-$OCAML_VERSION.tar.gz}
 
@@ -120,7 +120,7 @@ function init_variables() {
     # opam version we are installing and download URL
     : ${OPAM_MAJOR_VERSION=1}
     : ${OPAM_MINOR_VERSION=2}
-    : ${OPAM_PATCH_VERSION=0}
+    : ${OPAM_PATCH_VERSION=2}
     : ${OPAM_VERSION=$OPAM_MAJOR_VERSION.$OPAM_MINOR_VERSION.$OPAM_PATCH_VERSION}
     : ${OPAM_URL=https://github.com/ocaml/opam/releases/download/$OPAM_VERSION/opam-full-$OPAM_VERSION.tar.gz}
 
@@ -414,7 +414,7 @@ function brew_opam() {
     case $1 in
         retrieve)
             say Retrieving the latest version of opam
-            curl -LO $OPAM_URL
+            curl -kLO $OPAM_URL
             tar xzf opam-full-$OPAM_VERSION.tar.gz
             cd opam-full-$OPAM_VERSION
             ;;
