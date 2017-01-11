@@ -24,6 +24,8 @@ function help_then_exit() {
     echo "-r              Install OCaml and opam, no prompts"
     echo "-x              Install OCaml, findlib, opam, and oasis (via opam), no prompts"
     echo "-s [path]       Install OCaml from Subversion [path]"
+    echo "-g [url]        Install OCaml from Git [url]"
+    echo "-G [revision]   Checkout Git [revision] before build"
     echo "-t              Install OCaml from Subversion trunk"
     echo "-n [name]       Install under \$OCAMLBREW_BASE/[name]"
     echo
@@ -94,6 +96,9 @@ function init_variables() {
     : ${INSTALL_OASIS_ONLY="false"}
     : ${INSTALL_OPAM_ONLY="false"}
     : ${OCAMLBREW_INSTALL_SVN="false"}
+    : ${OCAMLBREW_INSTALL_GIT="false"}
+    : ${OCAMLBREW_GIT_URL=""}
+    : ${OCAMLBREW_GIT_REVISION=""}
 
     # Specify the 'make' executable to use
     : ${OCAMLBREW_MAKE="make"}
@@ -157,7 +162,7 @@ function init_variables() {
 # Handle command line arguments
 #
 function parse_opts() {
-    while getopts "hb:c:p:aorfxs:tn:v:" OPTION; do
+    while getopts "hb:c:p:aorfxs:g:G:tn:v:" OPTION; do
         case $OPTION in
             h)
                 help_then_exit ;;
@@ -189,6 +194,13 @@ function parse_opts() {
                 OCAMLBREW_INSTALL_SVN="true"
                 OCAMLBREW_SVN_PATH="$OPTARG"
                 ;;
+            g)
+                OCAMLBREW_INSTALL_GIT="true"
+                OCAMLBREW_GIT_URL="$OPTARG"
+                ;;
+            G)
+                OCAMLBREW_GIT_REVISION="$OPTARG"
+                ;;
             t)
                 OCAMLBREW_INSTALL_SVN="true"
                 ;;
@@ -215,6 +227,8 @@ function greet() {
     say
     if [ "$OCAMLBREW_INSTALL_SVN" = "true" ]; then
         say Working with "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH"
+    elif [ "$OCAMLBREW_INSTALL_GIT" = "true" ]; then
+	say Working with "$OCAMLBREW_GIT_URL"
     else
         say Working with "$OCAML_URL"
     fi
@@ -347,6 +361,12 @@ function brew_ocaml() {
                 mkdir build
                 svn checkout "$OCAML_SVN_ROOT""$OCAMLBREW_SVN_PATH" build
                 cd build
+            elif [ "$OCAMLBREW_INSTALL_GIT" = "true" ]; then
+		git clone $OCAMLBREW_GIT_URL
+		cd ocaml
+		if [ "$OCAMLBREW_GIT_REVISION" != "" ]; then
+		    git checkout "$OCAMLBREW_GIT_REVISION"
+		fi
             else
                 curl -O "$OCAML_URL"
                 tar xzf ocaml-$OCAML_VERSION.tar.gz
