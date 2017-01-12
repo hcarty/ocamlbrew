@@ -60,6 +60,8 @@ ocamlbrew can be configured with several environment variables.
     -r              Install OCaml, findlib, and opam, no prompts
     -x              Install OCaml, findlib, opam, and oasis (via opam), no prompts
     -s [path]       Install OCaml from Subversion [path]
+    -g [url]        Install OCaml from Git [url]
+    -G [revision]   Checkout Git [revision] before build
     -t              Install OCaml from Subversion trunk
     -n [name]       Install under $OCAMLBREW_BASE/[name]
 
